@@ -1,0 +1,649 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Más Rica</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f4f4;
+}
+
+header{
+    background:#d62828;
+    color:white;
+    text-align:center;
+    padding:25px;
+}
+
+header h1{
+    font-size:3rem;
+}
+
+.container{
+    width:90%;
+    max-width:1000px;
+    margin:20px auto;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+h2{
+    color:#d62828;
+    margin-bottom:15px;
+}
+
+.cliente{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.cliente input{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.producto{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid #ddd;
+}
+
+input[type="number"]{
+    width:70px;
+    padding:5px;
+}
+
+.total{
+    text-align:center;
+    font-size:28px;
+    color:#d62828;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    font-size:18px;
+    background:#25D366;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1db954;
+}
+
+footer{
+    background:#222;
+    color:white;
+    text-align:center;
+    padding:15px;
+    margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🍕 La Más Rica</h1>
+    <p>Pedidos Online por WhatsApp</p>
+    <p>Direccion:Calle 44 N 550</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Datos del Cliente</h2>
+
+        <div class="cliente">
+            <input type="text" id="nombre" placeholder="Nombre" required>
+            <input type="text" id="apellido" placeholder="Apellido" required>
+            <input type="tel" id="telefono" placeholder="Teléfono" required>
+            <input type="text" id="direccion" placeholder="Dirección" required>
+        </div>
+
+    </div>
+
+    
+    <div class="card">
+
+        <h2>Milanesas + Papas</h2>
+
+        <div class="producto">
+            <span>4 Milanesas Pollo(J,Q,T) + Papas - $25000</span>
+            <input type="number" id="mila_pollo4" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>2 Milanesas Pollo(J,Q,T) + Papas- $20000</span>
+            <input type="number" id="mila_pollo2" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+         <div class="producto">
+            <span>4 Milanesas Carne(J,Q,T) + Papas - $27000</span>
+            <input type="number" id="mila_carne4" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>2 Milanesas Carne(J,Q,T) + Papas- $23000</span>
+            <input type="number" id="mila_carne2" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>4 Milanesas Cerdo(J,Q,T) + Papas - $26000</span>
+            <input type="number" id="mila_cerdo4" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>2 Milanesas Cerdo(J,Q,T) + Papas- $21000</span>
+            <input type="number" id="mila_cerdo2" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+    </div>
+    
+    
+    <div class="card">
+
+
+        <h2>Empanadas</h2>
+
+        <div class="producto">
+            <span>Jamón y Queso (Media Docena) - $13000</span>
+            <input type="number" id="jyq_media" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Jamón y Queso (Docena) - $24000</span>
+            <input type="number" id="jyq_docena" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Carne (Media Docena) - $13000</span>
+            <input type="number" id="carne_media" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Carne (Docena) - $24000</span>
+            <input type="number" id="carne_docena" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Pollo (Media Docena) - $13000</span>
+            <input type="number" id="pollo_media" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Pollo (Docena) - $24000</span>
+            <input type="number" id="pollo_docena" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Roquefort (Media Docena) - $13000</span>
+            <input type="number" id="roquefort_media" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Roquefort (Docena) - $24000</span>
+            <input type="number" id="roquefort_docena" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Pizzas Especiales</h2>
+
+        <div class="producto">
+            <span>Napolitana - $12000</span>
+            <input type="number" id="napolitana" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Especial(Jamon y Morron) - $12500</span>
+            <input type="number" id="especial" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Cochina - $13500</span>
+            <input type="number" id="cochina" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>4 Quesos - $13000</span>
+            <input type="number" id="cuatroquesos" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Calabresa - $15000</span>
+            <input type="number" id="calabresa" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Roquefort - $12000</span>
+            <input type="number" id="pizza_roquefort" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Especial "La Mas Rica" - $14000</span>
+            <input type="number" id="la_mas_rica" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Huevo Duro - $12000</span>
+            <input type="number" id="huevo" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Choclo - $13000</span>
+            <input type="number" id="choclo" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Salchicha - $13000</span>
+            <input type="number" id="salchicha" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Anchoa - $12500</span>
+            <input type="number" id="anchoa" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Mozzarellas</h2>
+
+        <div class="producto">
+            <span>Mozzarella - $9000</span>
+            <input type="number" id="mozzarella" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Doble Mozzarella - $11000</span>
+            <input type="number" id="doble_mozzarella" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Mozza/Jamon - $10000</span>
+            <input type="number" id="mozza_jamon" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Mozza/Salame - $10000</span>
+            <input type="number" id="mozza_salame" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Mozza/Panceta - $14000</span>
+            <input type="number" id="mozza_panceta" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Mozza/Bondiola - $14000</span>
+            <input type="number" id="mozza_bondiola" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Promos</h2>
+
+        <div class="producto">
+            <span>2 Mozzarellas - $17000</span>
+            <input type="number" id="mozza_2" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>3 Mozzarellas - $26000</span>
+            <input type="number" id="mozza_3" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>1 Mozzarella + 1 Especial - $20000</span>
+            <input type="number" id="mozza_especial" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+    </div>
+    
+    <div class="card">
+
+        <h2>Sandwiches y Hamburguesas</h2>
+
+        <div class="producto">
+            <span>Sandwich de Milanesa(pollo) + Papas - $18000</span>
+            <input type="number" id="milanesa_pollo" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Sandwich de Milanesa(carne) + Papas - $20000</span>
+            <input type="number" id="milanesa_carne" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Sandwich de Milanesa(cerdo) + Papas - $19000</span>
+            <input type="number" id="milanesa_cerdo" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Hamburguesa(J,Q,T) + Papas - $9500</span>
+            <input type="number" id="hamburguesa" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Doble Hamburguesa(J,Q,T) + Papas - $18000</span>
+            <input type="number" id="doble_hamburguesa" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+    </div>
+
+        <div class="card">
+
+        <h2>Bebidas</h2>
+
+        <div class="producto">
+            <span> Gaseosa Coca Cola (2,25L) - $5000</span>
+            <input type="number" id="coca_cola" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Gaseosa Sprite (2,25L) - $5000</span>
+            <input type="number" id="sprite" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Gaseosa Manaos Cola (2,25L) - $2500</span>
+            <input type="number" id="manaos_cola" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Gaseosa Manaos Cola (1,5L) - $1500</span>
+            <input type="number" id="manaos_chica" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Gaseosa Manaos Lima (2,25L) - $2500</span>
+            <input type="number" id="manaos_lima" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Gaseosa Manaos Pomelo (2,25L) - $2500</span>
+            <input type="number" id="manaos_pomelo" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Jugo Fresh (1,5L) - $2500</span>
+            <input type="number" id="jugo_fresh" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Cerveza Oslava(1L) - $3000</span>
+            <input type="number" id="cerveza_oslava" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+        <div class="producto">
+            <span>Cerveza Del Pico(1L) - $3000</span>
+            <input type="number" id="cerveza_dp" value="0" min="0" onchange="calcularTotal()">
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h2>Total del Pedido</h2>
+        <div class="total">
+            $ <span id="total">0</span>
+        </div>
+    </div>
+
+    <button onclick="enviarPedido()">
+        Enviar Pedido por WhatsApp
+    </button>
+
+</div>
+
+<footer>
+    © 2026 La Más Rica
+</footer>
+
+<script>
+
+const precios = {
+    //MILANESAS CON PAPAS
+    mila_carne4:27000,
+    mila_carne2:23000,
+    mila_pollo4:25000,
+    mila_pollo2:20000,
+    mila_cerdo4:26000,
+    mila_cerdo2:21000,
+    //EMPANADAS
+    jyq_media:13000,
+    jyq_docena:24000,
+    carne_media:13000,
+    carne_docena:24000,
+    pollo_media:13000,
+    pollo_docena:24000,
+    roquefort_media:13000,
+    roquefort_docena:24000,
+
+    //PIZZAS ESPECIALES
+    napolitana:12000,
+    especial:12500,
+    cuatroquesos:13000,
+    calabresa:15000,
+    choclo:13000,
+    huevo:12000,
+    cochina:13500,
+    la_mas_rica:14000,
+    salchicha:13000,
+    pizza_roquefort:12000,
+    anchoa:12500,
+
+    //MOZZARELLAS
+    mozzarella:9000,
+    doble_mozzarella:11000,
+    mozza_jamon:10000,
+    mozza_salame:10000,
+    mozza_panceta:14000,
+    mozza_bondiola:14000,
+
+    //PROMOS 
+    mozza_2:17000,
+    mozza_3:26000,
+    mozza_especial:20000,
+    //SANDWICHES Y HAMBURGUESA
+    milanesa_pollo:18000,
+    milanesa_carne:20000,
+    milanesa_cerdo:19000,
+    hamburguesa:9500,
+    doble_hamburguesa:18000,
+
+    //BEBIDAS
+    coca_cola:5000,
+    sprite:4500,
+    manaos_cola:3000,
+    manaos_lima:3000,
+    manaos_pomelo:3000,
+    cerveza_oslava:3000,
+    cerveza_dp:3000,
+    jugo_fresh:2500,
+    manaos_chica:1500,
+
+};
+
+function calcularTotal(){
+
+    let total = 0;
+
+    for(let id in precios){
+
+        let cantidad =
+        parseInt(document.getElementById(id).value) || 0;
+
+        total += cantidad * precios[id];
+    }
+
+    document.getElementById("total").innerText =
+    total.toLocaleString("es-AR");
+}
+
+function enviarPedido(){
+
+    let nombre =
+    document.getElementById("nombre").value;
+
+    let apellido =
+    document.getElementById("apellido").value;
+
+    let telefonoCliente =
+    document.getElementById("telefono").value;
+
+    let direccion =
+    document.getElementById("direccion").value;
+
+    if(
+        nombre==="" ||
+        apellido==="" ||
+        telefonoCliente==="" ||
+        direccion==="")
+    {
+        alert("Complete todos los datos.");
+        return;
+    }
+
+    let mensaje =
+    " *PEDIDO - LA MAS RICA*%0A%0A";
+
+    mensaje +=
+    " Cliente: " + nombre + " " + apellido + "%0A";
+
+    mensaje +=
+    " Telefono: " + telefonoCliente + "%0A";
+
+    mensaje +=
+    " Direccion: " + direccion + "%0A%0A";
+
+    mensaje +=
+    " PRODUCTOS:%0A"
+    function agregar(nombre,id){
+
+        let cantidad =
+        document.getElementById(id).value;
+
+        if(cantidad > 0){
+
+            mensaje +=
+            "• " + nombre +
+            ": " + cantidad +
+            "%0A";
+        }
+    }
+    //MILANESAS
+    agregar("4 Milanesas(Pollo) con Papas","mila_pollo4");
+    agregar("2 Milanesas(Pollo) con Papas","mila_pollo2");
+
+    agregar("4 Milanesas(Carne) con Papas","mila_carne4");
+    agregar("2 Milanesas(Carne) con Papas","mila_carne2");
+
+    agregar("4 Milanesas(Cerdo) con Papas","mila_cerdo4");
+    agregar("2 Milanesas(Cerdo) con Papas","mila_cerdo2");
+    //EMPANADAS
+    agregar("Emp. JyQ Media Docena","jyq_media");
+    agregar("Emp. JyQ Docena","jyq_docena");
+
+    agregar("Emp. Carne Media Docena","carne_media");
+    agregar("Emp. Carne Docena","carne_docena");
+
+    agregar("Emp. Pollo Media Docena","pollo_media");
+    agregar("Emp. Pollo Docena","pollo_docena");
+
+    agregar("Emp. Roquefort Media Docena","roquefort_media");
+    agregar("Emp. Roquefort Docena","roquefort_docena");
+    //PIZZAS ESPECIALES
+    agregar("Pizza Napolitana","napolitana");
+    agregar("Pizza Especial","especial");
+    agregar("Pizza 4 Quesos","cuatroquesos");
+    agregar("Pizza Calabresa","calabresa");
+
+    agregar("Pizza Choclo","choclo");
+    agregar("Pizza Huevo Duro","huevo");
+    agregar("Pizza Cochina","cochina");
+    agregar("Pizza La Mas Rica","la_mas_rica");
+    agregar("Pizza Salchicha","salchicha");
+    agregar("Pizza Roquefort","pizza_roquefort");
+    agregar("Pizza Anchoas","anchoa");
+
+    //MOZZARELLAS
+    agregar("Pizza Mozzarella","mozzarella");
+    agregar("Doble Mozzarella","doble_mozzarella");
+    agregar("Pizza Mozza/Jamon","mozza_jamon");
+    agregar("Pizza Mozza/Salame","mozza_salame");
+    agregar("Pizza Mozza/Panceta","mozza_panceta");
+    agregar("Pizza Mozza/Bondiola","mozza_bondiola");
+    //PROMOS
+    agregar("Promo 2 Mozzarellas","mozza_2");
+    agregar("Promo 3 Mozzarellas","mozza_3");
+    agregar("Promo 1 Muzzarella y 1 Especial","mozza_especial");
+
+    //SANDWICHES Y HAMBURGUESAS
+    agregar("Sandwich de Milanesa(Pollo) y Papas","milanesa_pollo");
+    agregar("Sandwich de Milanesa(Carne) y Papas","milanesa_carne");
+    agregar("Sandwich de Milanesa(Cerdo) y Papas","milanesa_cerdo");
+    agregar("Hamburguesa","hamburguesa");
+    agregar("Doble Hamburguesa","doble_hamburguesa");
+    //BEBIDAS
+    agregar("Gaseosa Coca Cola","coca_cola");
+    agregar("Gaseosa Sprite","sprite");
+    agregar("Gaseosa Manaos Cola(2,25L)","manaos_cola");
+    agregar("Gaseosa Manaos Cola(1,5L)","manaos_chica");
+    agregar("Gaseosa Manaos Lima","manaos_lima");
+    agregar("Gaseosa Manaos Pomelo","manaos_pomelo");
+    agregar("Jugo Fresh","jugo_fresh");
+    agregar("Cerveza Oslava","cerveza_oslava");
+    agregar("Cerveza Del Pico","cerveza_dp");
+
+    mensaje += "%0A TOTAL: $" +
+    document.getElementById("total").innerText;
+
+    let telefonoNegocio =
+    "5493487558548";
+
+    window.open(
+        "https://wa.me/" +
+        telefonoNegocio +
+        "?text=" +
+        mensaje,
+        "_blank"
+    );
+}
+
+</script>
+
+</body>
+</html>
+```
