@@ -1,649 +1,699 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>La Más Rica</title>
-
+<meta name="description" content="Pedí online en La Más Rica: pizzas, empanadas, milanesas y más. Armá tu pedido y enviálo directo por WhatsApp.">
+<meta name="theme-color" content="#c8372b">
+<title>La Más Rica — Pedidos Online</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍕</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
-}
-
-body{
-    background:#f4f4f4;
-}
-
-header{
-    background:#d62828;
-    color:white;
-    text-align:center;
-    padding:25px;
-}
-
-header h1{
-    font-size:3rem;
-}
-
-.container{
-    width:90%;
-    max-width:1000px;
-    margin:20px auto;
-}
-
-.card{
-    background:white;
-    padding:20px;
-    margin-bottom:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,.1);
-}
-
-h2{
-    color:#d62828;
-    margin-bottom:15px;
-}
-
-.cliente{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.cliente input{
-    padding:10px;
-    border:1px solid #ccc;
-    border-radius:5px;
-}
-
-.producto{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:10px 0;
-    border-bottom:1px solid #ddd;
-}
-
-input[type="number"]{
-    width:70px;
-    padding:5px;
-}
-
-.total{
-    text-align:center;
-    font-size:28px;
-    color:#d62828;
-}
-
-button{
-    width:100%;
-    padding:15px;
-    font-size:18px;
-    background:#25D366;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#1db954;
-}
-
-footer{
-    background:#222;
-    color:white;
-    text-align:center;
-    padding:15px;
-    margin-top:20px;
-}
-
+  :root{
+    --cream:#fbf3e7;
+    --paper:#fffdf8;
+    --ink:#2b2118;
+    --ink-soft:#6b5d4f;
+    --red:#c8372b;
+    --red-dark:#9c2a20;
+    --gold:#e8a33d;
+    --green:#25d366;
+    --green-dark:#1da851;
+    --line:#ecd9c0;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  body,input,textarea{font-family:'Nunito',sans-serif;}
+  body{background:var(--cream);color:var(--ink);padding-bottom:88px;}
+  h1,h2,.display{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:0.01em;color:var(--ink);}
+  .mono{font-family:'Space Mono',monospace;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  :focus-visible{outline:3px solid var(--red);outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
+  }
+ 
+  /* ---------- HEADER ---------- */
+  header.site{
+    background:radial-gradient(circle at 20% 0%, #d8462f 0%, var(--red) 55%, var(--red-dark) 100%);
+    color:#fff;text-align:center;padding:34px 20px 28px;position:relative;overflow:hidden;
+  }
+  header.site::after{
+    content:"";position:absolute;inset:auto 0 0 0;height:10px;
+    background:repeating-linear-gradient(90deg, var(--cream) 0 14px, transparent 0 20px);
+    mask:radial-gradient(circle at 10px 0, transparent 9px, #000 9.5px) repeat-x;mask-size:20px 10px;
+  }
+  header.site h1{font-size:clamp(2.1rem,7vw,2.8rem);color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,0.15);margin:0;}
+  header.site .tag{font-size:1rem;opacity:0.95;margin:4px 0 0;}
+  header.site .addr{font-size:0.85rem;opacity:0.85;margin-top:10px;font-family:'Space Mono',monospace;}
+ 
+  /* ---------- CATEGORY NAV ---------- */
+  .cat-nav{
+    position:sticky;top:0;z-index:40;background:var(--ink);
+    display:flex;gap:8px;overflow-x:auto;padding:10px 14px;
+    scrollbar-width:none;transition:max-height 0.2s ease,opacity 0.2s ease,padding 0.2s ease;
+    max-height:60px;opacity:1;
+  }
+  .cat-nav.hidden-nav{max-height:0;opacity:0;padding-top:0;padding-bottom:0;overflow:hidden;pointer-events:none;}
+  .cat-nav::-webkit-scrollbar{display:none;}
+  .cat-chip{
+    flex:0 0 auto;background:#3a2e23;color:#e8d9c5;padding:8px 16px;border-radius:999px;
+    font-size:0.82rem;font-weight:700;white-space:nowrap;position:relative;
+    display:flex;align-items:center;gap:6px;transition:background 0.15s ease,color 0.15s ease;
+  }
+  .cat-chip.active{background:var(--gold);color:var(--ink);}
+  .cat-chip .badge{
+    background:var(--red);color:#fff;font-size:0.68rem;min-width:16px;height:16px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;padding:0 3px;
+  }
+  .cat-chip.has-items .badge{display:inline-flex;}
+ 
+  /* ---------- SEARCH ---------- */
+  .search-wrap{position:sticky;top:0;z-index:30;background:var(--cream);padding:10px 4% 4px;}
+  .search-box{
+    position:relative;max-width:760px;margin:0 auto;
+  }
+  .search-box input{
+    width:100%;padding:12px 40px 12px 40px;border:1px solid var(--line);border-radius:999px;
+    font-size:0.95rem;background:var(--paper);box-shadow:0 6px 16px -10px rgba(43,33,24,0.35);
+  }
+  .search-box .icon-search{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:0.5;pointer-events:none;}
+  .search-box .icon-clear{
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;color:var(--ink-soft);font-size:1rem;
+  }
+  .search-box.has-text .icon-clear{display:flex;}
+  .search-box .icon-clear:hover{background:var(--line);}
+ 
+  /* ---------- LAYOUT ---------- */
+  .container{width:92%;max-width:760px;margin:16px auto 22px;}
+  .card{
+    background:var(--paper);padding:20px 18px;margin-bottom:18px;border-radius:var(--radius);
+    box-shadow:0 10px 26px -16px rgba(43,33,24,0.35);scroll-margin-top:112px;
+  }
+  .card h2{font-size:1.4rem;color:var(--red-dark);margin:0 0 14px;display:flex;align-items:center;gap:9px;}
+  .card h2 .cat-icon{font-size:1.15rem;}
+ 
+  .no-results{
+    text-align:center;padding:34px 20px;color:var(--ink-soft);
+  }
+  .no-results .big{font-size:2rem;display:block;margin-bottom:6px;}
+ 
+  /* ---------- CLIENTE ---------- */
+  .cliente{display:flex;flex-direction:column;gap:12px;}
+  .cliente label{font-size:0.78rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:-6px;}
+  .cliente label .opt{text-transform:none;font-weight:600;letter-spacing:0;opacity:0.7;}
+  .cliente input,.cliente textarea{
+    padding:12px 14px;border:1px solid var(--line);border-radius:9px;font-size:0.95rem;background:var(--cream);
+    width:100%;resize:vertical;
+  }
+  .cliente textarea{min-height:52px;}
+  .cliente input.error{border-color:var(--red);background:#fdeeec;}
+  .field-error{color:var(--red);font-size:0.8rem;display:none;margin-top:-4px;}
+  .field-error.show{display:block;}
+ 
+  /* ---------- PRODUCTOS ---------- */
+  .producto{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:12px 0;border-bottom:1px solid var(--line);
+  }
+  .producto:last-child{border-bottom:none;}
+  .producto.hide-item{display:none;}
+  .prod-info{flex:1;}
+  .prod-name{font-size:0.93rem;font-weight:600;line-height:1.3;}
+  .prod-name mark{background:rgba(232,163,61,0.45);color:inherit;border-radius:3px;padding:0 1px;}
+  .prod-price{font-size:0.82rem;color:var(--ink-soft);font-family:'Space Mono',monospace;margin-top:2px;}
+  .prod-subtotal{font-size:0.78rem;color:var(--red-dark);font-weight:700;font-family:'Space Mono',monospace;margin-top:2px;display:none;}
+  .prod-subtotal.show{display:block;}
+  .stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:0 0 auto;}
+  .stepper button{
+    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    font-size:1.1rem;font-weight:700;color:var(--red-dark);background:var(--cream);
+  }
+  .stepper button:active{background:var(--gold);}
+  .stepper .qty{width:30px;text-align:center;font-weight:700;font-family:'Space Mono',monospace;font-size:0.9rem;}
+  .stepper .qty.pulse{animation:pulse 0.28s ease;}
+  @keyframes pulse{0%{transform:scale(1);}45%{transform:scale(1.35);color:var(--red-dark);}100%{transform:scale(1);}}
+ 
+  /* ---------- BOTTOM BAR ---------- */
+  .order-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:var(--ink);color:#fff;box-shadow:0 -10px 24px -10px rgba(0,0,0,0.4);
+  }
+  .order-summary{
+    max-height:0;overflow-y:auto;transition:max-height 0.25s ease;
+    border-bottom:1px dashed #564535;
+    background-image:radial-gradient(circle 5px at 0 0, transparent 5px, var(--ink) 5.5px),
+                      radial-gradient(circle 5px at 100% 0, transparent 5px, var(--ink) 5.5px);
+    background-position:0 0,100% 0;background-repeat:no-repeat;
+  }
+  .order-summary.open{max-height:300px;}
+  .order-summary-inner{padding:14px 18px;font-family:'Space Mono',monospace;font-size:0.82rem;}
+  .order-summary-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-family:'Nunito',sans-serif;}
+  .clear-order{color:#e29c8c;font-size:0.78rem;font-weight:700;text-decoration:underline;text-underline-offset:2px;}
+  .order-summary-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;color:#d9c9b5;border-bottom:1px dotted #45392c;}
+  .order-summary-row:last-of-type{border-bottom:none;}
+  .order-summary-row .row-name{flex:1;}
+  .order-summary-row .row-actions{display:flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;}
+  .order-summary-row .row-actions button{
+    width:22px;height:22px;border-radius:50%;background:#3a2e23;color:#e8d9c5;font-size:0.85rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .order-summary-row .row-actions button:hover{background:var(--red);color:#fff;}
+  .order-summary-empty{color:#a8957f;text-align:center;padding:14px 0;font-family:'Nunito',sans-serif;}
+  .order-bar-main{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:12px;}
+  .order-toggle{display:flex;flex-direction:column;align-items:flex-start;gap:1px;}
+  .order-toggle .label{font-size:0.7rem;color:#cabaa9;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;}
+  .order-toggle .chev{transition:transform 0.2s ease;}
+  .order-toggle.open .chev{transform:rotate(180deg);}
+  .order-toggle .amount{font-family:'Space Mono',monospace;font-size:1.25rem;font-weight:700;color:#fff;}
+  .send-btn{
+    background:var(--green);color:#fff;padding:13px 20px;border-radius:999px;font-weight:800;
+    font-size:0.92rem;display:flex;align-items:center;gap:8px;white-space:nowrap;transition:background 0.15s ease;
+  }
+  .send-btn:hover{background:var(--green-dark);}
+  .send-btn:disabled{background:#564535;color:#a8957f;cursor:not-allowed;}
+ 
+  /* ---------- SCROLL TOP ---------- */
+  .scroll-top{
+    position:fixed;right:16px;bottom:96px;z-index:45;width:42px;height:42px;border-radius:50%;
+    background:var(--paper);color:var(--red-dark);box-shadow:0 6px 18px -6px rgba(43,33,24,0.5);
+    display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+    opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity 0.2s ease,transform 0.2s ease;
+  }
+  .scroll-top.show{opacity:1;pointer-events:auto;transform:translateY(0);}
+ 
+  footer.site{background:#221a13;color:#a8957f;text-align:center;padding:18px;font-size:0.8rem;margin-top:10px;}
+ 
+  @media (min-width:600px){
+    .order-bar-main{padding:14px 28px;}
+    .send-btn{padding:14px 30px;}
+  }
 </style>
 </head>
-
 <body>
-
-<header>
-    <h1>🍕 La Más Rica</h1>
-    <p>Pedidos Online por WhatsApp</p>
-    <p>Direccion:Calle 44 N 550</p>
+ 
+<header class="site">
+  <h1>🍕 La Más Rica</h1>
+  <p class="tag">Pedidos Online por WhatsApp</p>
+  <p class="addr">📍 Calle 44 N° 550</p>
 </header>
-
-<div class="container">
-
-    <div class="card">
-
-        <h2>Datos del Cliente</h2>
-
-        <div class="cliente">
-            <input type="text" id="nombre" placeholder="Nombre" required>
-            <input type="text" id="apellido" placeholder="Apellido" required>
-            <input type="tel" id="telefono" placeholder="Teléfono" required>
-            <input type="text" id="direccion" placeholder="Dirección" required>
-        </div>
-
-    </div>
-
-    
-    <div class="card">
-
-        <h2>Pizzanesas + Papas</h2>
-
-        <div class="producto">
-            <span>4 Pizzanesas Pollo(J,Q,T) + Papas - $25000</span>
-            <input type="number" id="mila_pollo4" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>2 Pizzanesas Pollo(J,Q,T) + Papas- $20000</span>
-            <input type="number" id="mila_pollo2" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-         <div class="producto">
-            <span>4 Pizzanesas Carne(J,Q,T) + Papas - $27000</span>
-            <input type="number" id="mila_carne4" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>2 Pizzanesas Carne(J,Q,T) + Papas- $23000</span>
-            <input type="number" id="mila_carne2" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>4 Pizzanesas Cerdo(J,Q,T) + Papas - $26000</span>
-            <input type="number" id="mila_cerdo4" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>2 Pizzanesas Cerdo(J,Q,T) + Papas- $21000</span>
-            <input type="number" id="mila_cerdo2" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-    </div>
-    
-    
-    <div class="card">
-
-
-        <h2>Empanadas</h2>
-
-        <div class="producto">
-            <span>Jamón y Queso (Media Docena) - $13000</span>
-            <input type="number" id="jyq_media" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Jamón y Queso (Docena) - $24000</span>
-            <input type="number" id="jyq_docena" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Carne (Media Docena) - $13000</span>
-            <input type="number" id="carne_media" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Carne (Docena) - $24000</span>
-            <input type="number" id="carne_docena" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Pollo (Media Docena) - $13000</span>
-            <input type="number" id="pollo_media" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Pollo (Docena) - $24000</span>
-            <input type="number" id="pollo_docena" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Roquefort (Media Docena) - $13000</span>
-            <input type="number" id="roquefort_media" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Roquefort (Docena) - $24000</span>
-            <input type="number" id="roquefort_docena" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <h2>Pizzas Especiales</h2>
-
-        <div class="producto">
-            <span>Napolitana - $12000</span>
-            <input type="number" id="napolitana" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Especial(Jamon y Morron) - $12500</span>
-            <input type="number" id="especial" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Cochina - $13500</span>
-            <input type="number" id="cochina" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>4 Quesos - $13000</span>
-            <input type="number" id="cuatroquesos" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Calabresa - $15000</span>
-            <input type="number" id="calabresa" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Roquefort - $12000</span>
-            <input type="number" id="pizza_roquefort" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Especial "La Mas Rica" - $14000</span>
-            <input type="number" id="la_mas_rica" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Huevo Duro - $12000</span>
-            <input type="number" id="huevo" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Choclo - $13000</span>
-            <input type="number" id="choclo" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Salchicha - $13000</span>
-            <input type="number" id="salchicha" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Anchoa - $12500</span>
-            <input type="number" id="anchoa" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <h2>Mozzarellas</h2>
-
-        <div class="producto">
-            <span>Mozzarella - $9000</span>
-            <input type="number" id="mozzarella" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Doble Mozzarella - $11000</span>
-            <input type="number" id="doble_mozzarella" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Mozza/Jamon - $10000</span>
-            <input type="number" id="mozza_jamon" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Mozza/Salame - $10000</span>
-            <input type="number" id="mozza_salame" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Mozza/Panceta - $14000</span>
-            <input type="number" id="mozza_panceta" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Mozza/Bondiola - $14000</span>
-            <input type="number" id="mozza_bondiola" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <h2>Promos</h2>
-
-        <div class="producto">
-            <span>2 Mozzarellas - $17000</span>
-            <input type="number" id="mozza_2" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>3 Mozzarellas - $26000</span>
-            <input type="number" id="mozza_3" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>1 Mozzarella + 1 Especial - $20000</span>
-            <input type="number" id="mozza_especial" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-    </div>
-    
-    <div class="card">
-
-        <h2>Sandwiches y Hamburguesas</h2>
-
-        <div class="producto">
-            <span>Sandwich de Milanesa(pollo) + Papas - $18000</span>
-            <input type="number" id="milanesa_pollo" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Sandwich de Milanesa(carne) + Papas - $20000</span>
-            <input type="number" id="milanesa_carne" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Sandwich de Milanesa(cerdo) + Papas - $19000</span>
-            <input type="number" id="milanesa_cerdo" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Hamburguesa(J,Q,T) + Papas - $9500</span>
-            <input type="number" id="hamburguesa" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Doble Hamburguesa(J,Q,T) + Papas - $18000</span>
-            <input type="number" id="doble_hamburguesa" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-    </div>
-
-        <div class="card">
-
-        <h2>Bebidas</h2>
-
-        <div class="producto">
-            <span> Gaseosa Coca Cola (2,25L) - $5000</span>
-            <input type="number" id="coca_cola" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Gaseosa Sprite (2,25L) - $5000</span>
-            <input type="number" id="sprite" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Gaseosa Manaos Cola (2,25L) - $2500</span>
-            <input type="number" id="manaos_cola" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Gaseosa Manaos Cola (1,5L) - $1500</span>
-            <input type="number" id="manaos_chica" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Gaseosa Manaos Lima (2,25L) - $2500</span>
-            <input type="number" id="manaos_lima" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Gaseosa Manaos Pomelo (2,25L) - $2500</span>
-            <input type="number" id="manaos_pomelo" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Jugo Fresh (1,5L) - $2500</span>
-            <input type="number" id="jugo_fresh" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Cerveza Oslava(1L) - $3000</span>
-            <input type="number" id="cerveza_oslava" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-        <div class="producto">
-            <span>Cerveza Del Pico(1L) - $3000</span>
-            <input type="number" id="cerveza_dp" value="0" min="0" onchange="calcularTotal()">
-        </div>
-
-    </div>
-
-    <div class="card">
-        <h2>Total del Pedido</h2>
-        <div class="total">
-            $ <span id="total">0</span>
-        </div>
-    </div>
-
-    <button onclick="enviarPedido()">
-        Enviar Pedido por WhatsApp
-    </button>
-
+ 
+<div class="search-wrap">
+  <div class="search-box" id="searchBox">
+    <span class="icon-search" aria-hidden="true">🔎</span>
+    <input type="search" id="buscador" placeholder="Buscar en el menú… (ej: mozzarella, coca)" aria-label="Buscar productos">
+    <button type="button" class="icon-clear" id="clearSearch" aria-label="Borrar búsqueda">✕</button>
+  </div>
 </div>
-
-<footer>
-    © 2026 La Más Rica
-</footer>
-
+ 
+<nav class="cat-nav" id="catNav" aria-label="Categorías del menú"></nav>
+ 
+<div class="container">
+  <div class="card" id="card-cliente">
+    <h2>Datos del cliente</h2>
+    <div class="cliente">
+      <div>
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" placeholder="Tu nombre" autocomplete="given-name">
+        <p class="field-error" id="err-nombre">Falta el nombre.</p>
+      </div>
+      <div>
+        <label for="apellido">Apellido</label>
+        <input type="text" id="apellido" placeholder="Tu apellido" autocomplete="family-name">
+        <p class="field-error" id="err-apellido">Falta el apellido.</p>
+      </div>
+      <div>
+        <label for="telefono">Teléfono</label>
+        <input type="tel" id="telefono" placeholder="Ej: 11 5555-0192" autocomplete="tel" inputmode="tel">
+        <p class="field-error" id="err-telefono">Ingresá un teléfono válido (mínimo 8 dígitos).</p>
+      </div>
+      <div>
+        <label for="direccion">Dirección de entrega</label>
+        <input type="text" id="direccion" placeholder="Calle, número, referencias" autocomplete="street-address">
+        <p class="field-error" id="err-direccion">Falta la dirección.</p>
+      </div>
+      <div>
+        <label for="notas">Aclaraciones <span class="opt">(opcional)</span></label>
+        <textarea id="notas" placeholder="Ej: sin cebolla, timbre roto, piso 2 depto B…"></textarea>
+      </div>
+    </div>
+  </div>
+ 
+  <div id="menuSections"></div>
+  <div class="card no-results" id="noResults" style="display:none;" role="status">
+    <span class="big">🍽️</span>
+    No encontramos productos para <strong id="noResultsQuery"></strong>.
+  </div>
+</div>
+ 
+<footer class="site">© 2026 La Más Rica</footer>
+ 
+<button class="scroll-top" id="scrollTop" aria-label="Volver arriba">↑</button>
+ 
+<div class="order-bar">
+  <div class="order-summary" id="orderSummary">
+    <div class="order-summary-inner" id="orderSummaryInner"></div>
+  </div>
+  <div class="order-bar-main">
+    <button class="order-toggle" id="orderToggle" aria-expanded="false">
+      <span class="label">Ver pedido <span class="chev">▾</span></span>
+      <span class="amount mono" id="barTotal" aria-live="polite">$0</span>
+    </button>
+    <button class="send-btn" id="sendBtn" disabled>Enviar por WhatsApp 📲</button>
+  </div>
+</div>
+ 
 <script>
-
-const precios = {
-    //MILANESAS CON PAPAS
-    mila_carne4:27000,
-    mila_carne2:23000,
-    mila_pollo4:25000,
-    mila_pollo2:20000,
-    mila_cerdo4:26000,
-    mila_cerdo2:21000,
-    //EMPANADAS
-    jyq_media:13000,
-    jyq_docena:24000,
-    carne_media:13000,
-    carne_docena:24000,
-    pollo_media:13000,
-    pollo_docena:24000,
-    roquefort_media:13000,
-    roquefort_docena:24000,
-
-    //PIZZAS ESPECIALES
-    napolitana:12000,
-    especial:12500,
-    cuatroquesos:13000,
-    calabresa:15000,
-    choclo:13000,
-    huevo:12000,
-    cochina:13500,
-    la_mas_rica:14000,
-    salchicha:13000,
-    pizza_roquefort:12000,
-    anchoa:12500,
-
-    //MOZZARELLAS
-    mozzarella:9000,
-    doble_mozzarella:11000,
-    mozza_jamon:10000,
-    mozza_salame:10000,
-    mozza_panceta:14000,
-    mozza_bondiola:14000,
-
-    //PROMOS 
-    mozza_2:17000,
-    mozza_3:26000,
-    mozza_especial:20000,
-    //SANDWICHES Y HAMBURGUESA
-    milanesa_pollo:18000,
-    milanesa_carne:20000,
-    milanesa_cerdo:19000,
-    hamburguesa:9500,
-    doble_hamburguesa:18000,
-
-    //BEBIDAS
-    coca_cola:5000,
-    sprite:5000,
-    manaos_cola:2500,
-    manaos_lima:2500,
-    manaos_pomelo:2500,
-    cerveza_oslava:3000,
-    cerveza_dp:3000,
-    jugo_fresh:2500,
-    manaos_chica:1500,
-
-};
-
-function calcularTotal(){
-
-    let total = 0;
-
-    for(let id in precios){
-
-        let cantidad =
-        parseInt(document.getElementById(id).value) || 0;
-
-        total += cantidad * precios[id];
-    }
-
-    document.getElementById("total").innerText =
-    total.toLocaleString("es-AR");
-}
-
-function enviarPedido(){
-
-    let nombre =
-    document.getElementById("nombre").value;
-
-    let apellido =
-    document.getElementById("apellido").value;
-
-    let telefonoCliente =
-    document.getElementById("telefono").value;
-
-    let direccion =
-    document.getElementById("direccion").value;
-
-    if(
-        nombre==="" ||
-        apellido==="" ||
-        telefonoCliente==="" ||
-        direccion==="")
-    {
-        alert("Complete todos los datos.");
-        return;
-    }
-
-    let mensaje =
-    " *PEDIDO - LA MAS RICA*%0A%0A";
-
-    mensaje +=
-    " Cliente: " + nombre + " " + apellido + "%0A";
-
-    mensaje +=
-    " Telefono: " + telefonoCliente + "%0A";
-
-    mensaje +=
-    " Direccion: " + direccion + "%0A%0A";
-
-    mensaje +=
-    " PRODUCTOS:%0A"
-    function agregar(nombre,id){
-
-        let cantidad =
-        document.getElementById(id).value;
-
-        if(cantidad > 0){
-
-            mensaje +=
-            "• " + nombre +
-            ": " + cantidad +
-            "%0A";
+(function(){
+  "use strict";
+ 
+  /* ---------- DATA: todo el menú en un solo lugar ---------- */
+  const MENU = [
+    { cat: "Pizzanesas + Papas", icon:"🥩", items: [
+      {id:"mila_pollo4", name:"4 Pizzanesas Pollo (J,Q,T) + Papas", price:25000},
+      {id:"mila_pollo2", name:"2 Pizzanesas Pollo (J,Q,T) + Papas", price:20000},
+      {id:"mila_carne4", name:"4 Pizzanesas Carne (J,Q,T) + Papas", price:27000},
+      {id:"mila_carne2", name:"2 Pizzanesas Carne (J,Q,T) + Papas", price:23000},
+      {id:"mila_cerdo4", name:"4 Pizzanesas Cerdo (J,Q,T) + Papas", price:26000},
+      {id:"mila_cerdo2", name:"2 Pizzanesas Cerdo (J,Q,T) + Papas", price:21000},
+    ]},
+    { cat: "Empanadas", icon:"🥟", items: [
+      {id:"jyq_media", name:"Empanadas Jamón y Queso (Media Docena)", price:13000},
+      {id:"jyq_docena", name:"Empanadas Jamón y Queso (Docena)", price:24000},
+      {id:"carne_media", name:"Empanadas Carne (Media Docena)", price:13000},
+      {id:"carne_docena", name:"Empanadas Carne (Docena)", price:24000},
+      {id:"pollo_media", name:"Empanadas Pollo (Media Docena)", price:13000},
+      {id:"pollo_docena", name:"Empanadas Pollo (Docena)", price:24000},
+      {id:"roquefort_media", name:"Empanadas Roquefort (Media Docena)", price:13000},
+      {id:"roquefort_docena", name:"Empanadas Roquefort (Docena)", price:24000},
+    ]},
+    { cat: "Pizzas Especiales", icon:"🍕", items: [
+      {id:"napolitana", name:"Napolitana", price:12000},
+      {id:"especial", name:'Especial (Jamón y Morrón)', price:12500},
+      {id:"cochina", name:"Cochina", price:13500},
+      {id:"cuatroquesos", name:"4 Quesos", price:13000},
+      {id:"calabresa", name:"Calabresa", price:15000},
+      {id:"pizza_roquefort", name:"Roquefort", price:12000},
+      {id:"la_mas_rica", name:'Especial "La Más Rica"', price:14000},
+      {id:"huevo", name:"Huevo Duro", price:12000},
+      {id:"choclo", name:"Choclo", price:13000},
+      {id:"salchicha", name:"Salchicha", price:13000},
+      {id:"anchoa", name:"Anchoa", price:12500},
+    ]},
+    { cat: "Mozzarellas", icon:"🧀", items: [
+      {id:"mozzarella", name:"Mozzarella", price:9000},
+      {id:"doble_mozzarella", name:"Doble Mozzarella", price:11000},
+      {id:"mozza_jamon", name:"Mozza/Jamón", price:10000},
+      {id:"mozza_salame", name:"Mozza/Salame", price:10000},
+      {id:"mozza_panceta", name:"Mozza/Panceta", price:14000},
+      {id:"mozza_bondiola", name:"Mozza/Bondiola", price:14000},
+    ]},
+    { cat: "Promos", icon:"🔥", items: [
+      {id:"mozza_2", name:"Promo:2 Mozzarellas", price:17000},
+      {id:"mozza_3", name:"Promo:3 Mozzarellas", price:26000},
+      {id:"mozza_especial", name:"Promo:1 Mozzarella + 1 Especial", price:20000},
+    ]},
+    { cat: "Sandwiches y Hamburguesas", icon:"🍔", items: [
+      {id:"milanesa_pollo", name:"Sandwich de Milanesa (Pollo) + Papas", price:18000},
+      {id:"milanesa_carne", name:"Sandwich de Milanesa (Carne) + Papas", price:20000},
+      {id:"milanesa_cerdo", name:"Sandwich de Milanesa (Cerdo) + Papas", price:19000},
+      {id:"hamburguesa", name:"Hamburguesa (J,Q,T) + Papas", price:9500},
+      {id:"doble_hamburguesa", name:"Doble Hamburguesa (J,Q,T) + Papas", price:18000},
+    ]},
+    { cat: "Bebidas", icon:"🥤", items: [
+      {id:"coca_cola", name:"Gaseosa Coca-Cola (2,25L)", price:5000},
+      {id:"sprite", name:"Gaseosa Sprite (2,25L)", price:5000},
+      {id:"manaos_cola", name:"Gaseosa Manaos Cola (2,25L)", price:2500},
+      {id:"manaos_chica", name:"Gaseosa Manaos Cola (1,5L)", price:1500},
+      {id:"manaos_lima", name:"Gaseosa Manaos Lima (2,25L)", price:2500},
+      {id:"manaos_pomelo", name:"Gaseosa Manaos Pomelo (2,25L)", price:2500},
+      {id:"jugo_fresh", name:"Jugo Fresh (1,5L)", price:2500},
+      {id:"cerveza_oslava", name:"Cerveza Oslava (1L)", price:3000},
+      {id:"cerveza_dp", name:"Cerveza Del Pico (1L)", price:3000},
+    ]},
+  ];
+ 
+  const TELEFONO_NEGOCIO = "5493487311273";
+  const STORAGE_KEY = "lamasrica_pedido_v1";
+ 
+  /* ---------- STATE ---------- */
+  const cantidades = {};
+  MENU.forEach(sec => sec.items.forEach(it => cantidades[it.id] = 0));
+  let searchTerm = "";
+ 
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const money = n => '$' + n.toLocaleString('es-AR');
+  const slug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-');
+  const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ 
+  /* ---------- PERSISTENCIA ---------- */
+  function guardarEstado(){
+    try{
+      const data = {
+        cantidades,
+        cliente:{
+          nombre: $('#nombre').value,
+          apellido: $('#apellido').value,
+          telefono: $('#telefono').value,
+          direccion: $('#direccion').value,
+          notas: $('#notas').value,
         }
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }catch(e){ /* localStorage no disponible: seguimos sin persistencia */ }
+  }
+ 
+  function cargarEstado(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const data = JSON.parse(raw);
+      if(data.cantidades){
+        Object.keys(data.cantidades).forEach(id => {
+          if(id in cantidades) cantidades[id] = Math.max(0, parseInt(data.cantidades[id]) || 0);
+        });
+      }
+      if(data.cliente){
+        $('#nombre').value = data.cliente.nombre || '';
+        $('#apellido').value = data.cliente.apellido || '';
+        $('#telefono').value = data.cliente.telefono || '';
+        $('#direccion').value = data.cliente.direccion || '';
+        $('#notas').value = data.cliente.notas || '';
+      }
+    }catch(e){ /* datos corruptos o localStorage no disponible */ }
+  }
+ 
+  /* ---------- RENDER MENU + NAV ---------- */
+  function renderMenu(){
+    const nav = $('#catNav');
+    const sections = $('#menuSections');
+    nav.innerHTML = '';
+    sections.innerHTML = '';
+ 
+    MENU.forEach(sec => {
+      const secId = 'cat-' + slug(sec.cat);
+ 
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'cat-chip';
+      chip.id = 'chip-' + secId;
+      chip.innerHTML = `${sec.icon} ${sec.cat} <span class="badge" id="badge-${secId}">0</span>`;
+      chip.addEventListener('click', () => {
+        document.getElementById(secId).scrollIntoView({behavior:'smooth', block:'start'});
+      });
+      nav.appendChild(chip);
+ 
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = secId;
+      card.innerHTML = `<h2><span class="cat-icon">${sec.icon}</span>${sec.cat}</h2>` + sec.items.map(it => `
+        <div class="producto" id="row-${it.id}">
+          <div class="prod-info">
+            <div class="prod-name" id="name-${it.id}">${it.name}</div>
+            <div class="prod-price">${money(it.price)}</div>
+            <div class="prod-subtotal" id="sub-${it.id}"></div>
+          </div>
+          <div class="stepper">
+            <button type="button" aria-label="Quitar ${it.name}" data-dec="${it.id}">−</button>
+            <span class="qty" id="qty-${it.id}">0</span>
+            <button type="button" aria-label="Agregar ${it.name}" data-inc="${it.id}">+</button>
+          </div>
+        </div>
+      `).join('');
+      sections.appendChild(card);
+    });
+ 
+    $$('[data-inc]').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.inc, 1)));
+    $$('[data-dec]').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.dec, -1)));
+  }
+ 
+  /* ---------- QTY / TOTALS ---------- */
+  function changeQty(id, delta){
+    cantidades[id] = Math.max(0, cantidades[id] + delta);
+    const qtyEl = $('#qty-' + id);
+    qtyEl.textContent = cantidades[id];
+    qtyEl.classList.remove('pulse');
+    void qtyEl.offsetWidth;
+    qtyEl.classList.add('pulse');
+ 
+    const item = findItem(id);
+    const subEl = $('#sub-' + id);
+    if(cantidades[id] > 0){
+      subEl.textContent = cantidades[id] + ' × ' + money(item.price) + ' = ' + money(item.price * cantidades[id]);
+      subEl.classList.add('show');
+    } else {
+      subEl.classList.remove('show');
     }
-    //PIZZANESAS
-    agregar("4 Pizzanesas(Pollo) con Papas","mila_pollo4");
-    agregar("2 Pizzanesas(Pollo) con Papas","mila_pollo2");
-
-    agregar("4 Pizzanesas(Carne) con Papas","mila_carne4");
-    agregar("2 Pizzanesas(Carne) con Papas","mila_carne2");
-
-    agregar("4 Pizzanesas(Cerdo) con Papas","mila_cerdo4");
-    agregar("2 Pizzanesas(Cerdo) con Papas","mila_cerdo2");
-    //EMPANADAS
-    agregar("Emp. JyQ Media Docena","jyq_media");
-    agregar("Emp. JyQ Docena","jyq_docena");
-
-    agregar("Emp. Carne Media Docena","carne_media");
-    agregar("Emp. Carne Docena","carne_docena");
-
-    agregar("Emp. Pollo Media Docena","pollo_media");
-    agregar("Emp. Pollo Docena","pollo_docena");
-
-    agregar("Emp. Roquefort Media Docena","roquefort_media");
-    agregar("Emp. Roquefort Docena","roquefort_docena");
-    //PIZZAS ESPECIALES
-    agregar("Pizza Napolitana","napolitana");
-    agregar("Pizza Especial","especial");
-    agregar("Pizza 4 Quesos","cuatroquesos");
-    agregar("Pizza Calabresa","calabresa");
-
-    agregar("Pizza Choclo","choclo");
-    agregar("Pizza Huevo Duro","huevo");
-    agregar("Pizza Cochina","cochina");
-    agregar("Pizza La Mas Rica","la_mas_rica");
-    agregar("Pizza Salchicha","salchicha");
-    agregar("Pizza Roquefort","pizza_roquefort");
-    agregar("Pizza Anchoas","anchoa");
-
-    //MOZZARELLAS
-    agregar("Pizza Mozzarella","mozzarella");
-    agregar("Doble Mozzarella","doble_mozzarella");
-    agregar("Pizza Mozza/Jamon","mozza_jamon");
-    agregar("Pizza Mozza/Salame","mozza_salame");
-    agregar("Pizza Mozza/Panceta","mozza_panceta");
-    agregar("Pizza Mozza/Bondiola","mozza_bondiola");
-    //PROMOS
-    agregar("Promo 2 Mozzarellas","mozza_2");
-    agregar("Promo 3 Mozzarellas","mozza_3");
-    agregar("Promo 1 Muzzarella y 1 Especial","mozza_especial");
-
-    //SANDWICHES Y HAMBURGUESAS
-    agregar("Sandwich de Milanesa(Pollo) y Papas","milanesa_pollo");
-    agregar("Sandwich de Milanesa(Carne) y Papas","milanesa_carne");
-    agregar("Sandwich de Milanesa(Cerdo) y Papas","milanesa_cerdo");
-    agregar("Hamburguesa","hamburguesa");
-    agregar("Doble Hamburguesa","doble_hamburguesa");
-    //BEBIDAS
-    agregar("Gaseosa Coca Cola","coca_cola");
-    agregar("Gaseosa Sprite","sprite");
-    agregar("Gaseosa Manaos Cola(2,25L)","manaos_cola");
-    agregar("Gaseosa Manaos Cola(1,5L)","manaos_chica");
-    agregar("Gaseosa Manaos Lima","manaos_lima");
-    agregar("Gaseosa Manaos Pomelo","manaos_pomelo");
-    agregar("Jugo Fresh","jugo_fresh");
-    agregar("Cerveza Oslava","cerveza_oslava");
-    agregar("Cerveza Del Pico","cerveza_dp");
-
-    mensaje += "%0A TOTAL: $" +
-    document.getElementById("total").innerText;
-
-    let telefonoNegocio =
-    "5493487558548";
-
-    window.open(
-        "https://wa.me/" +
-        telefonoNegocio +
-        "?text=" +
-        mensaje,
-        "_blank"
-    );
-}
-
+    updateAll();
+    guardarEstado();
+  }
+ 
+  function findItem(id){
+    for(const sec of MENU){
+      const it = sec.items.find(i => i.id === id);
+      if(it) return it;
+    }
+    return null;
+  }
+ 
+  function updateAll(){
+    let total = 0;
+    let count = 0;
+ 
+    MENU.forEach(sec => {
+      const secId = 'cat-' + slug(sec.cat);
+      let secCount = 0;
+      sec.items.forEach(it => {
+        const qty = cantidades[it.id];
+        total += qty * it.price;
+        count += qty;
+        secCount += qty;
+      });
+      const chip = $('#chip-' + secId);
+      const badge = $('#badge-' + secId);
+      badge.textContent = secCount;
+      chip.classList.toggle('has-items', secCount > 0);
+    });
+ 
+    $('#barTotal').textContent = money(total);
+    $('#sendBtn').disabled = count === 0;
+    renderSummary(total, count);
+  }
+ 
+  function renderSummary(total, count){
+    const inner = $('#orderSummaryInner');
+    if(count === 0){
+      inner.innerHTML = '<p class="order-summary-empty">Todavía no agregaste productos.</p>';
+      return;
+    }
+    let rows = '<div class="order-summary-head"><span>Tu pedido</span><button type="button" class="clear-order" id="clearOrder">Vaciar pedido</button></div>';
+    MENU.forEach(sec => sec.items.forEach(it => {
+      const qty = cantidades[it.id];
+      if(qty > 0){
+        rows += `
+          <div class="order-summary-row">
+            <span class="row-name">${qty}× ${it.name}</span>
+            <span class="row-actions">
+              <button type="button" data-summary-dec="${it.id}" aria-label="Quitar uno de ${it.name}">−</button>
+              <button type="button" data-summary-inc="${it.id}" aria-label="Agregar uno más de ${it.name}">+</button>
+            </span>
+            <span>${money(it.price * qty)}</span>
+          </div>`;
+      }
+    }));
+    inner.innerHTML = rows;
+ 
+    $$('[data-summary-inc]').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.summaryInc, 1)));
+    $$('[data-summary-dec]').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.summaryDec, -1)));
+    const clearBtn = $('#clearOrder');
+    if(clearBtn) clearBtn.addEventListener('click', vaciarPedido);
+  }
+ 
+  function vaciarPedido(){
+    if(!confirm('¿Vaciar todo el pedido?')) return;
+    Object.keys(cantidades).forEach(id => {
+      cantidades[id] = 0;
+      const qtyEl = $('#qty-' + id);
+      if(qtyEl) qtyEl.textContent = '0';
+      const subEl = $('#sub-' + id);
+      if(subEl) subEl.classList.remove('show');
+    });
+    updateAll();
+    guardarEstado();
+  }
+ 
+  /* ---------- BÚSQUEDA ---------- */
+  function highlight(text, term){
+    if(!term) return text;
+    const idx = normalize(text).indexOf(term);
+    if(idx === -1) return text;
+    return text.slice(0, idx) + '<mark>' + text.slice(idx, idx + term.length) + '</mark>' + text.slice(idx + term.length);
+  }
+ 
+  function aplicarBusqueda(){
+    const nav = $('#catNav');
+    const searchBox = $('#searchBox');
+    searchBox.classList.toggle('has-text', searchTerm.length > 0);
+ 
+    if(!searchTerm){
+      nav.classList.remove('hidden-nav');
+      $$('.producto').forEach(row => row.classList.remove('hide-item'));
+      MENU.forEach(sec => {
+        const card = $('#cat-' + slug(sec.cat));
+        card.style.display = '';
+        sec.items.forEach(it => {
+          $('#name-' + it.id).innerHTML = it.name;
+        });
+      });
+      $('#noResults').style.display = 'none';
+      return;
+    }
+ 
+    nav.classList.add('hidden-nav');
+    let totalMatches = 0;
+ 
+    MENU.forEach(sec => {
+      const card = $('#cat-' + slug(sec.cat));
+      let matches = 0;
+      sec.items.forEach(it => {
+        const isMatch = normalize(it.name).includes(searchTerm);
+        const row = $('#row-' + it.id);
+        row.classList.toggle('hide-item', !isMatch);
+        $('#name-' + it.id).innerHTML = isMatch ? highlight(it.name, searchTerm) : it.name;
+        if(isMatch) matches++;
+      });
+      card.style.display = matches > 0 ? '' : 'none';
+      totalMatches += matches;
+    });
+ 
+    $('#noResultsQuery').textContent = '“' + $('#buscador').value.trim() + '”';
+    $('#noResults').style.display = totalMatches === 0 ? '' : 'none';
+  }
+ 
+  const buscador = $('#buscador');
+  buscador.addEventListener('input', () => {
+    searchTerm = normalize(buscador.value.trim());
+    aplicarBusqueda();
+  });
+  $('#clearSearch').addEventListener('click', () => {
+    buscador.value = '';
+    searchTerm = '';
+    aplicarBusqueda();
+    buscador.focus();
+  });
+ 
+  /* ---------- TOGGLE RESUMEN ---------- */
+  const orderToggle = $('#orderToggle');
+  const orderSummary = $('#orderSummary');
+  orderToggle.addEventListener('click', () => {
+    const isOpen = orderSummary.classList.toggle('open');
+    orderToggle.classList.toggle('open', isOpen);
+    orderToggle.setAttribute('aria-expanded', isOpen);
+  });
+ 
+  /* ---------- ACTIVE CHIP ON SCROLL ---------- */
+  function setupScrollSpy(){
+    const sections = MENU.map(sec => document.getElementById('cat-' + slug(sec.cat)));
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const chip = $('#chip-' + entry.target.id);
+        if(entry.isIntersecting){
+          $$('.cat-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          chip.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+        }
+      });
+    }, {rootMargin:'-50% 0px -45% 0px'});
+    sections.forEach(s => observer.observe(s));
+  }
+ 
+  /* ---------- SCROLL TOP ---------- */
+  const scrollTopBtn = $('#scrollTop');
+  window.addEventListener('scroll', () => {
+    scrollTopBtn.classList.toggle('show', window.scrollY > 500);
+  }, {passive:true});
+  scrollTopBtn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+ 
+  /* ---------- VALIDACIÓN Y ENVÍO ---------- */
+  function validarCampo(id){
+    const val = $('#' + id).value.trim();
+    let ok = val !== '';
+    if(ok && id === 'telefono'){
+      const digits = val.replace(/\D/g, '');
+      ok = digits.length >= 8;
+    }
+    $('#' + id).classList.toggle('error', !ok);
+    $('#err-' + id).classList.toggle('show', !ok);
+    return ok;
+  }
+ 
+  $('#sendBtn').addEventListener('click', () => {
+    const campos = ['nombre','apellido','telefono','direccion'];
+    const valid = campos.map(validarCampo).every(Boolean);
+ 
+    if(!valid){
+      $('#card-cliente').scrollIntoView({behavior:'smooth', block:'start'});
+      return;
+    }
+ 
+    const nombre = $('#nombre').value.trim();
+    const apellido = $('#apellido').value.trim();
+    const telefono = $('#telefono').value.trim();
+    const direccion = $('#direccion').value.trim();
+    const notas = $('#notas').value.trim();
+ 
+    let mensaje = 'PEDIDO - LA MAS RICA\n\n';
+    mensaje += 'Cliente: ' + nombre + ' ' + apellido + '\n';
+    mensaje += 'Telefono: ' + telefono + '\n';
+    mensaje += 'Direccion: ' + direccion + '\n';
+    if(notas) mensaje += 'Aclaraciones: ' + notas + '\n';
+    mensaje += '\nPRODUCTOS:\n';
+ 
+    let total = 0;
+    MENU.forEach(sec => sec.items.forEach(it => {
+      const qty = cantidades[it.id];
+      if(qty > 0){
+        mensaje += '• ' + it.name + ': ' + qty + '\n';
+        total += qty * it.price;
+      }
+    }));
+ 
+    mensaje += '\nTOTAL: ' + money(total);
+ 
+    window.open('https://wa.me/' + TELEFONO_NEGOCIO + '?text=' + encodeURIComponent(mensaje), '_blank');
+  });
+ 
+  // Quitar el estado de error apenas el cliente empieza a completar, y guardar cambios
+  ['nombre','apellido','telefono','direccion','notas'].forEach(id => {
+    $('#' + id).addEventListener('input', () => {
+      if($('#err-' + id)){
+        $('#' + id).classList.remove('error');
+        $('#err-' + id).classList.remove('show');
+      }
+      guardarEstado();
+    });
+  });
+ 
+  /* ---------- INIT ---------- */
+  renderMenu();
+  cargarEstado();
+  MENU.forEach(sec => sec.items.forEach(it => {
+    if(cantidades[it.id] > 0){
+      $('#qty-' + it.id).textContent = cantidades[it.id];
+      const subEl = $('#sub-' + it.id);
+      subEl.textContent = cantidades[it.id] + ' × ' + money(it.price) + ' = ' + money(it.price * cantidades[it.id]);
+      subEl.classList.add('show');
+    }
+  }));
+  updateAll();
+  setupScrollSpy();
+  if($$('.cat-chip')[0]) $$('.cat-chip')[0].classList.add('active');
+})();
 </script>
-
 </body>
 </html>
-```
+
