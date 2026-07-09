@@ -505,7 +505,7 @@
       chip.type = 'button';
       chip.className = 'cat-chip';
       chip.id = 'chip-' + secId;
-      chip.innerHTML = ${sec.icon} ${sec.cat} <span class="badge" id="badge-${secId}">0</span>;
+      chip.innerHTML = `${sec.icon} ${sec.cat} <span class="badge" id="badge-${secId}">0</span>`;
       chip.addEventListener('click', () => {
         document.getElementById(secId).scrollIntoView({behavior:'smooth', block:'start'});
       });
@@ -514,7 +514,7 @@
       const card = document.createElement('div');
       card.className = 'card';
       card.id = secId;
-      card.innerHTML = <h2><span class="cat-icon">${sec.icon}</span>${sec.cat}</h2> + sec.items.map(it => `
+      card.innerHTML = `<h2><span class="cat-icon">${sec.icon}</span>${sec.cat}</h2>` + sec.items.map(it => `
         <div class="producto" id="row-${it.id}">
           <div class="prod-info">
             <div class="prod-name" id="name-${it.id}">${it.name}</div>
