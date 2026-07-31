@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Pedí online en La Más Rica: pizzas, empanadas, milanesas y más. Armá tu pedido y enviálo directo por WhatsApp.">
+<meta name="description" content="Pedí online en La Más Rica: pizzas, empanadas, milanesas y más. Armá tu pedido y pagá con Mercado Pago o enviá directo por WhatsApp.">
 <meta name="theme-color" content="#c8372b">
 <title>La Más Rica — Pedidos Online</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍕</text></svg>">
@@ -20,6 +20,8 @@
     --gold:#e8a33d;
     --green:#25d366;
     --green-dark:#1da851;
+    --mp-blue:#009EE3;
+    --mp-blue-dark:#007bb5;
     --line:#ecd9c0;
     --radius:14px;
   }
@@ -179,22 +181,29 @@
   }
   .order-summary-row .row-actions button:hover{background:var(--red);color:#fff;}
   .order-summary-empty{color:#a8957f;text-align:center;padding:14px 0;font-family:'Nunito',sans-serif;}
-  .order-bar-main{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:12px;}
+  .order-bar-main{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:10px;}
   .order-toggle{display:flex;flex-direction:column;align-items:flex-start;gap:1px;}
   .order-toggle .label{font-size:0.7rem;color:#cabaa9;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;}
   .order-toggle .chev{transition:transform 0.2s ease;}
   .order-toggle.open .chev{transform:rotate(180deg);}
   .order-toggle .amount{font-family:'Space Mono',monospace;font-size:1.25rem;font-weight:700;color:#fff;}
+  .order-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto;}
+  .pay-btn{
+    background:var(--mp-blue);color:#fff;padding:13px 16px;border-radius:999px;font-weight:800;
+    font-size:0.82rem;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background 0.15s ease;
+  }
+  .pay-btn:hover{background:var(--mp-blue-dark);}
+  .pay-btn:disabled{background:#564535;color:#a8957f;cursor:not-allowed;}
   .send-btn{
-    background:var(--green);color:#fff;padding:13px 20px;border-radius:999px;font-weight:800;
-    font-size:0.92rem;display:flex;align-items:center;gap:8px;white-space:nowrap;transition:background 0.15s ease;
+    background:var(--green);color:#fff;padding:13px 14px;border-radius:999px;font-weight:800;
+    font-size:0.78rem;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background 0.15s ease;
   }
   .send-btn:hover{background:var(--green-dark);}
   .send-btn:disabled{background:#564535;color:#a8957f;cursor:not-allowed;}
   .call-btn{
-    width:48px;height:48px;border-radius:50%;flex:0 0 auto;
+    width:44px;height:44px;border-radius:50%;flex:0 0 auto;
     background:var(--paper);color:var(--red-dark);
-    display:flex;align-items:center;justify-content:center;font-size:1.25rem;
+    display:flex;align-items:center;justify-content:center;font-size:1.1rem;
     text-decoration:none;box-shadow:0 6px 16px -8px rgba(0,0,0,0.4);
     transition:background 0.15s ease, transform 0.15s ease;
   }
@@ -209,11 +218,43 @@
   }
   .scroll-top.show{opacity:1;pointer-events:auto;transform:translateY(0);}
 
+  /* ---------- PAYMENT OVERLAY ---------- */
+  .payment-overlay{
+    position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.6);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    animation:fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .payment-modal{
+    background:var(--paper);border-radius:18px;padding:30px 24px;max-width:380px;width:100%;
+    text-align:center;box-shadow:0 20px 50px -10px rgba(0,0,0,0.5);
+  }
+  .payment-modal .payment-icon{font-size:3rem;margin-bottom:10px;line-height:1;}
+  .payment-modal h3{font-family:'Anton',sans-serif;font-size:1.6rem;margin:0 0 8px;color:var(--ink);}
+  .payment-modal p{color:var(--ink-soft);margin:0 0 20px;font-size:0.92rem;line-height:1.4;}
+  .payment-modal .send-btn{width:100%;justify-content:center;margin-bottom:10px;padding:14px;font-size:0.92rem;}
+  .payment-modal .close-overlay{
+    background:none;color:var(--ink-soft);font-weight:700;font-size:0.88rem;padding:8px;width:100%;
+  }
+  .payment-modal .close-overlay:hover{color:var(--ink);}
+
+  /* ---------- PAY LOADING ---------- */
+  .pay-loading{
+    position:fixed;inset:0;z-index:99;background:rgba(0,0,0,0.5);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .pay-loading .spinner{
+    width:48px;height:48px;border:4px solid var(--line);border-top-color:var(--mp-blue);
+    border-radius:50%;animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
   footer.site{background:#221a13;color:#a8957f;text-align:center;padding:18px;font-size:0.8rem;margin-top:10px;}
 
   @media (min-width:600px){
     .order-bar-main{padding:14px 28px;}
-    .send-btn{padding:14px 30px;}
+    .pay-btn{padding:14px 22px;font-size:0.88rem;}
+    .send-btn{padding:14px 18px;font-size:0.85rem;}
   }
 </style>
 </head>
@@ -221,7 +262,7 @@
 
 <header class="site">
   <h1>🍕 La Más Rica</h1>
-  <p class="tag">Pedidos Online por WhatsApp</p>
+  <p class="tag">Pedidos Online · Mercado Pago & WhatsApp</p>
   <p class="addr">📍 Calle 44 N° 550</p>
 </header>
 
@@ -288,6 +329,21 @@
 
 <button class="scroll-top" id="scrollTop" aria-label="Volver arriba">↑</button>
 
+<!-- Payment loading & overlay -->
+<div class="pay-loading" id="payLoading" style="display:none;">
+  <div class="spinner"></div>
+</div>
+
+<div class="payment-overlay" id="paymentOverlay" style="display:none;">
+  <div class="payment-modal">
+    <div class="payment-icon" id="paymentIcon">✅</div>
+    <h3 id="paymentTitle">¡Pago aprobado!</h3>
+    <p id="paymentMessage">Tu pago fue procesado correctamente. Enviá tu pedido al local.</p>
+    <button class="send-btn" id="sendAfterPay">Enviar pedido por WhatsApp 📲</button>
+    <button class="close-overlay" id="closeOverlay">Cerrar</button>
+  </div>
+</div>
+
 <div class="order-bar">
   <div class="order-summary" id="orderSummary">
     <div class="order-summary-inner" id="orderSummaryInner"></div>
@@ -297,8 +353,11 @@
       <span class="label">Ver pedido <span class="chev">▾</span></span>
       <span class="amount mono" id="barTotal" aria-live="polite">$0</span>
     </button>
-    <a class="call-btn" href="tel:+5493487311273" aria-label="Llamar al local">📞</a>
-    <button class="send-btn" id="sendBtn" disabled>Enviar por WhatsApp 📲</button>
+    <div class="order-actions">
+      <a class="call-btn" href="tel:+5493487311273" aria-label="Llamar al local">📞</a>
+      <button class="pay-btn" id="payBtn" disabled>🛒 Pagar</button>
+      <button class="send-btn" id="sendBtn" disabled>WhatsApp</button>
+    </div>
   </div>
 </div>
 
@@ -306,11 +365,17 @@
 (function(){
   "use strict";
 
-  /* ---------- CONFIGURACIÓN DEL NEGOCIO ---------- */
-  /* Editá estos valores según tu realidad. Horarios en formato 24hs.   */
-  /* 0=Domingo, 1=Lunes ... 6=Sábado. Poné null en un día si no abren.  */
+  /* ================================================================
+     CONFIGURACIÓN
+     ================================================================ */
+
+  /* ---- URL del backend que crea la preferencia de Mercado Pago ---- */
+  /* Si cambiás de dominio o hosting, actualizá esta URL.             */
+  const BACKEND_URL = "https://lyra-30aae27e.base44.app/functions/createMercadoPagoPreference";
+
+  /* ---- Datos del negocio ---- */
   const CONFIG_NEGOCIO = {
-    costoEnvio: 3000,      // en pesos. Poné null si el envío varía por zona
+    costoEnvio: 3000,
     horarios: {
       0: { apertura: 18, cierre: 24 },
       1: { apertura: 18, cierre: 24 },
@@ -322,7 +387,15 @@
     },
   };
 
+  const TELEFONO_NEGOCIO = "5493487311273";
+  const STORAGE_KEY = "lamasrica_pedido_v1";
+  const PENDING_PAYMENT_KEY = "lamasrica_pending_payment_v1";
+
   let localAbierto = true;
+
+  /* ================================================================
+     HORARIO / BANNER
+     ================================================================ */
 
   function actualizarBanner(){
     const ahora = new Date();
@@ -374,7 +447,10 @@
   localAbierto = actualizarBanner();
   setInterval(actualizarBannerYBoton, 60000);
 
-  /* ---------- DATA: todo el menú en un solo lugar ---------- */
+  /* ================================================================
+     DATA: MENÚ
+     ================================================================ */
+
   const MENU = [
     { cat: "Pizzanesas + Papas", icon:"🥩", items: [
       {id:"mila_pollo4", name:"4 Pizzanesas Pollo (J,Q,T) + Papas", price:25000},
@@ -440,10 +516,10 @@
     ]},
   ];
 
-  const TELEFONO_NEGOCIO = "5493487311273";
-  const STORAGE_KEY = "lamasrica_pedido_v1";
+  /* ================================================================
+     STATE + HELPERS
+     ================================================================ */
 
-  /* ---------- STATE ---------- */
   const cantidades = {};
   MENU.forEach(sec => sec.items.forEach(it => cantidades[it.id] = 0));
   let searchTerm = "";
@@ -454,7 +530,10 @@
   const slug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-');
   const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
-  /* ---------- PERSISTENCIA ---------- */
+  /* ================================================================
+     PERSISTENCIA
+     ================================================================ */
+
   function guardarEstado(){
     try{
       const data = {
@@ -468,7 +547,7 @@
         }
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }catch(e){ /* localStorage no disponible: seguimos sin persistencia */ }
+    }catch(e){ }
   }
 
   function cargarEstado(){
@@ -488,10 +567,13 @@
         $('#direccion').value = data.cliente.direccion || '';
         $('#notas').value = data.cliente.notas || '';
       }
-    }catch(e){ /* datos corruptos o localStorage no disponible */ }
+    }catch(e){ }
   }
 
-  /* ---------- RENDER MENU + NAV ---------- */
+  /* ================================================================
+     RENDER MENU + NAV
+     ================================================================ */
+
   function renderMenu(){
     const nav = $('#catNav');
     const sections = $('#menuSections');
@@ -535,7 +617,10 @@
     $$('[data-dec]').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.dec, -1)));
   }
 
-  /* ---------- QTY / TOTALS ---------- */
+  /* ================================================================
+     QTY / TOTALS
+     ================================================================ */
+
   function changeQty(id, delta){
     cantidades[id] = Math.max(0, cantidades[id] + delta);
     const qtyEl = $('#qty-' + id);
@@ -586,12 +671,17 @@
     $('#barTotal').textContent = money(total);
 
     const sendBtn = $('#sendBtn');
+    const payBtn = $('#payBtn');
     if(!localAbierto){
       sendBtn.disabled = true;
-      sendBtn.textContent = 'Local cerrado 🔒';
+      sendBtn.textContent = 'Cerrado 🔒';
+      payBtn.disabled = true;
+      payBtn.textContent = 'Cerrado 🔒';
     } else {
       sendBtn.disabled = count === 0;
-      sendBtn.textContent = 'Enviar por WhatsApp 📲';
+      sendBtn.textContent = 'WhatsApp';
+      payBtn.disabled = count === 0;
+      payBtn.textContent = '🛒 Pagar';
     }
 
     renderSummary(total, count);
@@ -618,6 +708,18 @@
           </div>`;
       }
     }));
+    if(CONFIG_NEGOCIO.costoEnvio && CONFIG_NEGOCIO.costoEnvio > 0){
+      rows += `
+        <div class="order-summary-row" style="color:#e8d9c5;">
+          <span class="row-name">Envío a domicilio</span>
+          <span>${money(CONFIG_NEGOCIO.costoEnvio)}</span>
+        </div>`;
+    }
+    rows += `
+      <div class="order-summary-row" style="border-top:1px solid #564535;padding-top:8px;margin-top:4px;color:#fff;font-weight:700;">
+        <span class="row-name">Total</span>
+        <span>${money(total + (CONFIG_NEGOCIO.costoEnvio || 0))}</span>
+      </div>`;
     inner.innerHTML = rows;
 
     $$('[data-summary-inc]').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.summaryInc, 1)));
@@ -655,7 +757,10 @@
     guardarEstado();
   }
 
-  /* ---------- BÚSQUEDA ---------- */
+  /* ================================================================
+     BÚSQUEDA
+     ================================================================ */
+
   function highlight(text, term){
     if(!term) return text;
     const idx = normalize(text).indexOf(term);
@@ -715,7 +820,10 @@
     buscador.focus();
   });
 
-  /* ---------- TOGGLE RESUMEN ---------- */
+  /* ================================================================
+     TOGGLE RESUMEN
+     ================================================================ */
+
   const orderToggle = $('#orderToggle');
   const orderSummary = $('#orderSummary');
   orderToggle.addEventListener('click', () => {
@@ -724,7 +832,10 @@
     orderToggle.setAttribute('aria-expanded', isOpen);
   });
 
-  /* ---------- ACTIVE CHIP ON SCROLL ---------- */
+  /* ================================================================
+     SCROLL SPY + SCROLL TOP
+     ================================================================ */
+
   function setupScrollSpy(){
     const sections = MENU.map(sec => document.getElementById('cat-' + slug(sec.cat)));
     const observer = new IntersectionObserver(entries => {
@@ -740,14 +851,16 @@
     sections.forEach(s => observer.observe(s));
   }
 
-  /* ---------- SCROLL TOP ---------- */
   const scrollTopBtn = $('#scrollTop');
   window.addEventListener('scroll', () => {
     scrollTopBtn.classList.toggle('show', window.scrollY > 500);
   }, {passive:true});
   scrollTopBtn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
 
-  /* ---------- VALIDACIÓN Y ENVÍO ---------- */
+  /* ================================================================
+     VALIDACIÓN
+     ================================================================ */
+
   function validarCampo(id){
     const val = $('#' + id).value.trim();
     let ok = val !== '';
@@ -760,44 +873,66 @@
     return ok;
   }
 
-  $('#sendBtn').addEventListener('click', () => {
-    const campos = ['nombre','apellido','telefono','direccion'];
-    const valid = campos.map(validarCampo).every(Boolean);
+  /* ================================================================
+     CONSTRUIR ORDEN (compartido entre WhatsApp y Mercado Pago)
+     ================================================================ */
 
-    if(!valid){
-      $('#card-cliente').scrollIntoView({behavior:'smooth', block:'start'});
-      return;
-    }
+  function obtenerItemsDelCarrito(){
+    const items = [];
+    MENU.forEach(sec => sec.items.forEach(it => {
+      if(cantidades[it.id] > 0){
+        const nombreItem = (sec.cat === 'Pizzas Especiales' || sec.cat === 'Mozzarellas')
+          ? 'Pizza ' + it.name : it.name;
+        items.push({ id: it.id, title: nombreItem, quantity: cantidades[it.id], unit_price: it.price });
+      }
+    }));
+    return items;
+  }
 
-    const nombre = $('#nombre').value.trim();
-    const apellido = $('#apellido').value.trim();
-    const telefono = $('#telefono').value.trim();
-    const direccion = $('#direccion').value.trim();
-    const notas = $('#notas').value.trim();
+  function obtenerDatosCliente(){
+    return {
+      nombre: $('#nombre').value.trim(),
+      apellido: $('#apellido').value.trim(),
+      telefono: $('#telefono').value.trim(),
+      direccion: $('#direccion').value.trim(),
+      notas: $('#notas').value.trim(),
+    };
+  }
 
+  function construirMensajeWhatsApp(orderData, estadoPago){
+    const c = orderData.cliente;
     let mensaje = 'PEDIDO - LA MAS RICA\n\n';
-    mensaje += 'Cliente: ' + nombre + ' ' + apellido + '\n';
-    mensaje += 'Telefono: ' + telefono + '\n';
-    mensaje += 'Direccion: ' + direccion + '\n';
-    if(notas) mensaje += 'Aclaraciones: ' + notas + '\n';
+    mensaje += 'Cliente: ' + c.nombre + ' ' + c.apellido + '\n';
+    mensaje += 'Telefono: ' + c.telefono + '\n';
+    mensaje += 'Direccion: ' + c.direccion + '\n';
+    if(c.notas) mensaje += 'Aclaraciones: ' + c.notas + '\n';
     mensaje += '\nPRODUCTOS:\n';
 
     let total = 0;
-    MENU.forEach(sec => sec.items.forEach(it => {
-      const qty = cantidades[it.id];
-      if(qty > 0){
-        const nombreMsg = (sec.cat === 'Pizzas Especiales' || sec.cat === 'Mozzarellas') ? 'Pizza ' + it.name : it.name;
-        mensaje += '• ' + nombreMsg + ': ' + qty + '\n';
-        total += qty * it.price;
-      }
-    }));
+    orderData.items.forEach(it => {
+      mensaje += '• ' + it.title + ': ' + it.quantity + '\n';
+      total += it.quantity * it.unit_price;
+    });
+
+    if(orderData.deliveryCost && orderData.deliveryCost > 0){
+      mensaje += '• Envío: 1\n';
+      total += orderData.deliveryCost;
+    }
 
     mensaje += '\nTOTAL: ' + money(total);
 
-    window.open('https://wa.me/' + TELEFONO_NEGOCIO + '?text=' + encodeURIComponent(mensaje), '_blank');
+    if(estadoPago){
+      mensaje += '\n\n💳 Pago: Mercado Pago (' + estadoPago + ')';
+    }
 
-    // Vaciamos el carrito de productos (mantenemos los datos del cliente
-    // cargados, por si hace otro pedido enseguida)
+    return mensaje;
+  }
+
+  function enviarWhatsApp(mensaje){
+    window.open('https://wa.me/' + TELEFONO_NEGOCIO + '?text=' + encodeURIComponent(mensaje), '_blank');
+  }
+
+  function vaciarCarrito(){
     Object.keys(cantidades).forEach(id => {
       cantidades[id] = 0;
       const qtyEl = $('#qty-' + id);
@@ -807,9 +942,192 @@
     });
     updateAll();
     guardarEstado();
+  }
+
+  /* ================================================================
+     BOTÓN WHATSAPP (pedir y pagar al recibir)
+     ================================================================ */
+
+  $('#sendBtn').addEventListener('click', () => {
+    const campos = ['nombre','apellido','telefono','direccion'];
+    const valid = campos.map(validarCampo).every(Boolean);
+    if(!valid){
+      $('#card-cliente').scrollIntoView({behavior:'smooth', block:'start'});
+      return;
+    }
+
+    const orderData = {
+      items: obtenerItemsDelCarrito(),
+      cliente: obtenerDatosCliente(),
+      deliveryCost: CONFIG_NEGOCIO.costoEnvio,
+    };
+
+    if(orderData.items.length === 0) return;
+
+    const mensaje = construirMensajeWhatsApp(orderData);
+    enviarWhatsApp(mensaje);
+    vaciarCarrito();
   });
 
-  // Quitar el estado de error apenas el cliente empieza a completar, y guardar cambios
+  /* ================================================================
+     BOTÓN MERCADO PAGO (Checkout Pro)
+     ================================================================ */
+
+  $('#payBtn').addEventListener('click', async () => {
+    const campos = ['nombre','apellido','telefono','direccion'];
+    const valid = campos.map(validarCampo).every(Boolean);
+    if(!valid){
+      $('#card-cliente').scrollIntoView({behavior:'smooth', block:'start'});
+      return;
+    }
+
+    const items = obtenerItemsDelCarrito();
+    if(items.length === 0) return;
+
+    const cliente = obtenerDatosCliente();
+    const orderData = {
+      items: items,
+      cliente: cliente,
+      deliveryCost: CONFIG_NEGOCIO.costoEnvio,
+    };
+
+    // Guardar la orden para recuperarla al volver de Mercado Pago
+    try{
+      localStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify(orderData));
+    }catch(e){ }
+
+    const backUrl = window.location.origin + window.location.pathname;
+    const payBtn = $('#payBtn');
+    const loadingEl = $('#payLoading');
+
+    try{
+      payBtn.disabled = true;
+      payBtn.textContent = 'Procesando...';
+      loadingEl.style.display = 'flex';
+
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items,
+          payer: {
+            name: cliente.nombre,
+            surname: cliente.apellido,
+            phone: cliente.telefono,
+            address: cliente.direccion,
+          },
+          deliveryCost: CONFIG_NEGOCIO.costoEnvio,
+          backUrl: backUrl,
+        }),
+      });
+
+      const data = await res.json();
+
+      loadingEl.style.display = 'none';
+
+      if(data.error){
+        alert('Error al crear el pago: ' + data.error);
+        payBtn.disabled = false;
+        payBtn.textContent = '🛒 Pagar';
+        return;
+      }
+
+      // Redirigir a Mercado Pago Checkout Pro
+      window.location.href = data.init_point;
+
+    }catch(e){
+      loadingEl.style.display = 'none';
+      alert('Error al conectar con Mercado Pago. Intentá de nuevo.');
+      payBtn.disabled = false;
+      payBtn.textContent = '🛒 Pagar';
+    }
+  });
+
+  /* ================================================================
+     RETORNO DE MERCADO PAGO
+     ================================================================ */
+
+  function manejarRetornoMercadoPago(){
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    if(!status) return;
+
+    const pendingRaw = localStorage.getItem(PENDING_PAYMENT_KEY);
+    if(!pendingRaw) {
+      // No hay orden pendiente, limpiar URL y salir
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
+    let orderData;
+    try{
+      orderData = JSON.parse(pendingRaw);
+    }catch(e){
+      localStorage.removeItem(PENDING_PAYMENT_KEY);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
+    const overlay = $('#paymentOverlay');
+    const icon = $('#paymentIcon');
+    const title = $('#paymentTitle');
+    const message = $('#paymentMessage');
+    const sendAfterPay = $('#sendAfterPay');
+
+    let estadoPago = null;
+
+    if(status === 'approved'){
+      icon.textContent = '✅';
+      title.textContent = '¡Pago aprobado!';
+      message.textContent = 'Tu pago de fue procesado correctamente. Enviá tu pedido al local por WhatsApp.';
+      sendAfterPay.style.display = '';
+      estadoPago = 'Aprobado';
+    } else if(status === 'pending' || status === 'in_process'){
+      icon.textContent = '⏳';
+      title.textContent = 'Pago pendiente';
+      message.textContent = 'Tu pago está en proceso. Te avisaremos cuando se confirme. Enviá tu pedido al local.';
+      sendAfterPay.style.display = '';
+      estadoPago = 'Pendiente';
+    } else {
+      icon.textContent = '❌';
+      title.textContent = 'Pago rechazado';
+      message.textContent = 'No se pudo procesar el pago. Podés intentar nuevamente o pedir por WhatsApp.';
+      sendAfterPay.style.display = 'none';
+    }
+
+    overlay.style.display = 'flex';
+
+    // Botón: enviar pedido por WhatsApp tras pago
+    sendAfterPay.onclick = () => {
+      const mensaje = construirMensajeWhatsApp(orderData, estadoPago);
+      enviarWhatsApp(mensaje);
+      localStorage.removeItem(PENDING_PAYMENT_KEY);
+      overlay.style.display = 'none';
+      vaciarCarrito();
+      window.history.replaceState({}, document.title, window.location.pathname);
+    };
+
+    // Botón: cerrar overlay
+    $('#closeOverlay').onclick = () => {
+      overlay.style.display = 'none';
+      if(status === 'approved' || status === 'pending' || status === 'in_process'){
+        vaciarCarrito();
+        localStorage.removeItem(PENDING_PAYMENT_KEY);
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+    };
+
+    // Si el pago fue aprobado o pendiente, vaciar el carrito
+    // (la orden ya está guardada en pendingPayment)
+    if(status === 'approved' || status === 'pending' || status === 'in_process'){
+      vaciarCarrito();
+    }
+  }
+
+  /* ================================================================
+     INPUT LISTENERS
+     ================================================================ */
+
   ['nombre','apellido','telefono','direccion','notas'].forEach(id => {
     $('#' + id).addEventListener('input', () => {
       if($('#err-' + id)){
@@ -820,7 +1138,10 @@
     });
   });
 
-  /* ---------- INIT ---------- */
+  /* ================================================================
+     INIT
+     ================================================================ */
+
   renderMenu();
   cargarEstado();
   MENU.forEach(sec => sec.items.forEach(it => {
@@ -834,8 +1155,10 @@
   updateAll();
   setupScrollSpy();
   if($$('.cat-chip')[0]) $$('.cat-chip')[0].classList.add('active');
+
+  // Manejar retorno de Mercado Pago
+  manejarRetornoMercadoPago();
 })();
 </script>
 </body>
 </html>
-
