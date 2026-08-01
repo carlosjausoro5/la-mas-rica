@@ -127,6 +127,16 @@
 
   /* ---------- CLIENTE ---------- */
   .cliente{display:flex;flex-direction:column;gap:12px;}
+  .entrega-toggle{display:flex;gap:8px;}
+  .entrega-opt{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:11px 10px;border:1.5px solid var(--line);border-radius:9px;
+    font-size:0.86rem;font-weight:700;color:var(--ink-soft);background:var(--cream);
+    transition:background 0.15s ease,border-color 0.15s ease,color 0.15s ease;
+  }
+  .entrega-opt.active{background:var(--red);border-color:var(--red);color:#fff;}
+  .direccion-wrap{display:flex;flex-direction:column;gap:12px;overflow:hidden;max-height:200px;transition:max-height 0.2s ease,opacity 0.2s ease;opacity:1;}
+  .direccion-wrap.oculto{max-height:0;opacity:0;pointer-events:none;}
   .cliente label{font-size:0.78rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:-6px;}
   .cliente label .opt{text-transform:none;font-weight:600;letter-spacing:0;opacity:0.7;}
   .cliente input,.cliente textarea{
@@ -313,9 +323,18 @@
         <p class="field-error" id="err-telefono">Ingresá un teléfono válido (mínimo 8 dígitos).</p>
       </div>
       <div>
-        <label for="direccion">Dirección de entrega</label>
-        <input type="text" id="direccion" placeholder="Calle, número, referencias" autocomplete="street-address">
-        <p class="field-error" id="err-direccion">Falta la dirección.</p>
+        <label>¿Cómo lo recibís?</label>
+        <div class="entrega-toggle" id="entregaToggle" role="radiogroup" aria-label="Tipo de entrega">
+          <button type="button" class="entrega-opt active" id="opt-envio" data-tipo="envio" role="radio" aria-checked="true">🛵 Envío a domicilio</button>
+          <button type="button" class="entrega-opt" id="opt-retiro" data-tipo="retiro" role="radio" aria-checked="false">🏠 Retiro en el local</button>
+        </div>
+      </div>
+      <div class="direccion-wrap" id="direccionWrap">
+        <div>
+          <label for="direccion">Dirección de entrega</label>
+          <input type="text" id="direccion" placeholder="Calle, número, referencias" autocomplete="street-address">
+          <p class="field-error" id="err-direccion">Falta la dirección.</p>
+        </div>
       </div>
       <div>
         <label for="notas">Aclaraciones <span class="opt">(opcional)</span></label>
@@ -530,6 +549,11 @@
   const cantidades = {};
   MENU.forEach(sec => sec.items.forEach(it => cantidades[it.id] = 0));
   let searchTerm = "";
+  let tipoEntrega = "envio"; // "envio" | "retiro"
+
+  function costoEnvioActual(){
+    return tipoEntrega === "envio" ? CONFIG_NEGOCIO.costoEnvio : 0;
+  }
 
   const $ = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
@@ -546,6 +570,7 @@
       const data = {
         savedAt: Date.now(),
         cantidades,
+        tipoEntrega,
         cliente:{
           nombre: $('#nombre').value,
           apellido: $('#apellido').value,
@@ -575,6 +600,10 @@
         });
       } else if(vencido){
         localStorage.removeItem(STORAGE_KEY);
+      }
+
+      if(data.tipoEntrega === 'envio' || data.tipoEntrega === 'retiro'){
+        tipoEntrega = data.tipoEntrega;
       }
 
       if(data.cliente){
@@ -685,7 +714,7 @@
       chip.classList.toggle('has-items', secCount > 0);
     });
 
-    $('#barTotal').textContent = money(total);
+    $('#barTotal').textContent = money(count > 0 ? total + costoEnvioActual() : total);
 
     const sendBtn = $('#sendBtn');
     const payBtn = $('#payBtn');
@@ -725,17 +754,16 @@
           </div>`;
       }
     }));
-    if(CONFIG_NEGOCIO.costoEnvio && CONFIG_NEGOCIO.costoEnvio > 0){
-      rows += `
-        <div class="order-summary-row" style="color:#e8d9c5;">
-          <span class="row-name">Envío a domicilio</span>
-          <span>${money(CONFIG_NEGOCIO.costoEnvio)}</span>
-        </div>`;
-    }
+    const envio = costoEnvioActual();
+    rows += `
+      <div class="order-summary-row" style="color:#e8d9c5;">
+        <span class="row-name">${tipoEntrega === 'envio' ? 'Envío a domicilio' : 'Retiro en el local'}</span>
+        <span>${envio > 0 ? money(envio) : 'Gratis'}</span>
+      </div>`;
     rows += `
       <div class="order-summary-row" style="border-top:1px solid #564535;padding-top:8px;margin-top:4px;color:#fff;font-weight:700;">
         <span class="row-name">Total</span>
-        <span>${money(total + (CONFIG_NEGOCIO.costoEnvio || 0))}</span>
+        <span>${money(total + envio)}</span>
       </div>`;
     inner.innerHTML = rows;
 
@@ -875,10 +903,46 @@
   scrollTopBtn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
 
   /* ================================================================
+     ENTREGA: envío a domicilio vs retiro en el local
+     ================================================================ */
+
+  function setTipoEntrega(tipo){
+    tipoEntrega = tipo === 'retiro' ? 'retiro' : 'envio';
+
+    const optEnvio = $('#opt-envio');
+    const optRetiro = $('#opt-retiro');
+    const wrap = $('#direccionWrap');
+
+    optEnvio.classList.toggle('active', tipoEntrega === 'envio');
+    optEnvio.setAttribute('aria-checked', tipoEntrega === 'envio');
+    optRetiro.classList.toggle('active', tipoEntrega === 'retiro');
+    optRetiro.setAttribute('aria-checked', tipoEntrega === 'retiro');
+
+    wrap.classList.toggle('oculto', tipoEntrega === 'retiro');
+
+    // Si pasamos a retiro, limpiamos cualquier error pendiente de dirección
+    if(tipoEntrega === 'retiro'){
+      $('#direccion').classList.remove('error');
+      $('#err-direccion').classList.remove('show');
+    }
+
+    updateAll();
+    guardarEstado();
+  }
+
+  $('#opt-envio').addEventListener('click', () => setTipoEntrega('envio'));
+  $('#opt-retiro').addEventListener('click', () => setTipoEntrega('retiro'));
+
+  /* ================================================================
      VALIDACIÓN
      ================================================================ */
 
   function validarCampo(id){
+    if(id === 'direccion' && tipoEntrega === 'retiro'){
+      $('#direccion').classList.remove('error');
+      $('#err-direccion').classList.remove('show');
+      return true;
+    }
     const val = $('#' + id).value.trim();
     let ok = val !== '';
     if(ok && id === 'telefono'){
@@ -921,7 +985,12 @@
     let mensaje = 'PEDIDO - LA MAS RICA\n\n';
     mensaje += 'Cliente: ' + c.nombre + ' ' + c.apellido + '\n';
     mensaje += 'Telefono: ' + c.telefono + '\n';
-    mensaje += 'Direccion: ' + c.direccion + '\n';
+    if(orderData.tipoEntrega === 'retiro'){
+      mensaje += 'Entrega: Retiro en el local\n';
+    } else {
+      mensaje += 'Entrega: Envío a domicilio\n';
+      mensaje += 'Direccion: ' + c.direccion + '\n';
+    }
     if(c.notas) mensaje += 'Aclaraciones: ' + c.notas + '\n';
     mensaje += '\nPRODUCTOS:\n';
 
@@ -976,7 +1045,8 @@
     const orderData = {
       items: obtenerItemsDelCarrito(),
       cliente: obtenerDatosCliente(),
-      deliveryCost: CONFIG_NEGOCIO.costoEnvio,
+      deliveryCost: costoEnvioActual(),
+      tipoEntrega: tipoEntrega,
     };
 
     if(orderData.items.length === 0) return;
@@ -1005,7 +1075,8 @@
     const orderData = {
       items: items,
       cliente: cliente,
-      deliveryCost: CONFIG_NEGOCIO.costoEnvio,
+      deliveryCost: costoEnvioActual(),
+      tipoEntrega: tipoEntrega,
     };
 
     // Guardar la orden para recuperarla al volver de Mercado Pago
@@ -1033,7 +1104,8 @@
             phone: cliente.telefono,
             address: cliente.direccion,
           },
-          deliveryCost: CONFIG_NEGOCIO.costoEnvio,
+          deliveryCost: costoEnvioActual(),
+          tipoEntrega: tipoEntrega,
           backUrl: backUrl,
         }),
       });
@@ -1184,6 +1256,7 @@
 
   renderMenu();
   cargarEstado();
+  setTipoEntrega(tipoEntrega);
   MENU.forEach(sec => sec.items.forEach(it => {
     if(cantidades[it.id] > 0){
       $('#qty-' + it.id).textContent = cantidades[it.id];
