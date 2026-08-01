@@ -24,6 +24,7 @@
     --mp-blue-dark:#007bb5;
     --line:#ecd9c0;
     --radius:14px;
+    --search-h:56px;
   }
   *{box-sizing:border-box;}
   body{margin:0;}
@@ -67,9 +68,31 @@
   .info-banner__detalle strong{color:var(--ink);}
   .info-banner.cerrado{background:#fdf3ef;border-color:#eec7bb;}
 
+  /* ---------- SEARCH ---------- */
+  /* Sticky, arriba de todo: fila 1 del stack sticky */
+  .search-wrap{
+    position:sticky;top:0;z-index:41;background:var(--cream);
+    padding:10px 4% 4px;min-height:var(--search-h);
+  }
+  .search-box{
+    position:relative;max-width:760px;margin:0 auto;
+  }
+  .search-box input{
+    width:100%;padding:12px 40px 12px 40px;border:1px solid var(--line);border-radius:999px;
+    font-size:0.95rem;background:var(--paper);box-shadow:0 6px 16px -10px rgba(43,33,24,0.35);
+  }
+  .search-box .icon-search{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:0.5;pointer-events:none;}
+  .search-box .icon-clear{
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;color:var(--ink-soft);font-size:1rem;
+  }
+  .search-box.has-text .icon-clear{display:flex;}
+  .search-box .icon-clear:hover{background:var(--line);}
+
   /* ---------- CATEGORY NAV ---------- */
+  /* Sticky, fila 2 del stack: se pega justo debajo de la barra de búsqueda */
   .cat-nav{
-    position:sticky;top:0;z-index:40;background:var(--ink);
+    position:sticky;top:var(--search-h);z-index:40;background:var(--ink);
     display:flex;gap:8px;overflow-x:auto;padding:10px 14px;
     scrollbar-width:none;transition:max-height 0.2s ease,opacity 0.2s ease,padding 0.2s ease;
     max-height:60px;opacity:1;
@@ -88,28 +111,11 @@
   }
   .cat-chip.has-items .badge{display:inline-flex;}
 
-  /* ---------- SEARCH ---------- */
-  .search-wrap{position:sticky;top:0;z-index:30;background:var(--cream);padding:10px 4% 4px;}
-  .search-box{
-    position:relative;max-width:760px;margin:0 auto;
-  }
-  .search-box input{
-    width:100%;padding:12px 40px 12px 40px;border:1px solid var(--line);border-radius:999px;
-    font-size:0.95rem;background:var(--paper);box-shadow:0 6px 16px -10px rgba(43,33,24,0.35);
-  }
-  .search-box .icon-search{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:0.5;pointer-events:none;}
-  .search-box .icon-clear{
-    position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;
-    display:none;align-items:center;justify-content:center;color:var(--ink-soft);font-size:1rem;
-  }
-  .search-box.has-text .icon-clear{display:flex;}
-  .search-box .icon-clear:hover{background:var(--line);}
-
   /* ---------- LAYOUT ---------- */
   .container{width:92%;max-width:760px;margin:16px auto 22px;}
   .card{
     background:var(--paper);padding:20px 18px;margin-bottom:18px;border-radius:var(--radius);
-    box-shadow:0 10px 26px -16px rgba(43,33,24,0.35);scroll-margin-top:112px;
+    box-shadow:0 10px 26px -16px rgba(43,33,24,0.35);scroll-margin-top:132px;
   }
   .card h2{font-size:1.4rem;color:var(--red-dark);margin:0 0 14px;display:flex;align-items:center;gap:9px;}
   .card h2 .cat-icon{font-size:1.15rem;}
@@ -390,6 +396,7 @@
   const TELEFONO_NEGOCIO = "5493487311273";
   const STORAGE_KEY = "lamasrica_pedido_v1";
   const PENDING_PAYMENT_KEY = "lamasrica_pending_payment_v1";
+  const CART_EXPIRY_MS = 24 * 60 * 60 * 1000; // el carrito guardado vence a las 24hs
 
   let localAbierto = true;
 
@@ -537,6 +544,7 @@
   function guardarEstado(){
     try{
       const data = {
+        savedAt: Date.now(),
         cantidades,
         cliente:{
           nombre: $('#nombre').value,
@@ -555,11 +563,20 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return;
       const data = JSON.parse(raw);
-      if(data.cantidades){
+
+      // Si el carrito guardado tiene más de CART_EXPIRY_MS, lo descartamos
+      // (los precios/menú pueden haber cambiado). Los datos del cliente sí
+      // se conservan porque no vencen.
+      const vencido = !data.savedAt || (Date.now() - data.savedAt) > CART_EXPIRY_MS;
+
+      if(data.cantidades && !vencido){
         Object.keys(data.cantidades).forEach(id => {
           if(id in cantidades) cantidades[id] = Math.max(0, parseInt(data.cantidades[id]) || 0);
         });
+      } else if(vencido){
+        localStorage.removeItem(STORAGE_KEY);
       }
+
       if(data.cliente){
         $('#nombre').value = data.cliente.nombre || '';
         $('#apellido').value = data.cliente.apellido || '';
@@ -915,7 +932,7 @@
     });
 
     if(orderData.deliveryCost && orderData.deliveryCost > 0){
-      mensaje += '• Envío: 1\n';
+      mensaje += '• Envío: ' + money(orderData.deliveryCost) + '\n';
       total += orderData.deliveryCost;
     }
 
@@ -1021,12 +1038,35 @@
         }),
       });
 
-      const data = await res.json();
+      // Intentamos parsear como JSON sin asumir que el body es JSON válido:
+      // si el servidor devuelve un error HTML (500, 404, gateway timeout, etc.)
+      // res.json() explotaría y quedaría el catch genérico sin info útil.
+      let data = null;
+      try{
+        data = await res.json();
+      }catch(parseErr){
+        data = null;
+      }
 
       loadingEl.style.display = 'none';
 
-      if(data.error){
-        alert('Error al crear el pago: ' + data.error);
+      if(!res.ok){
+        const detalle = (data && data.error) ? data.error : ('Código ' + res.status);
+        alert('Error al crear el pago (' + detalle + '). Intentá de nuevo o pedí por WhatsApp.');
+        payBtn.disabled = false;
+        payBtn.textContent = '🛒 Pagar';
+        return;
+      }
+
+      if(!data || data.error){
+        alert('Error al crear el pago: ' + (data && data.error ? data.error : 'respuesta inválida del servidor.'));
+        payBtn.disabled = false;
+        payBtn.textContent = '🛒 Pagar';
+        return;
+      }
+
+      if(!data.init_point){
+        alert('No se pudo iniciar el pago. Intentá de nuevo o pedí por WhatsApp.');
         payBtn.disabled = false;
         payBtn.textContent = '🛒 Pagar';
         return;
@@ -1037,7 +1077,7 @@
 
     }catch(e){
       loadingEl.style.display = 'none';
-      alert('Error al conectar con Mercado Pago. Intentá de nuevo.');
+      alert('Error al conectar con Mercado Pago. Verificá tu conexión e intentá de nuevo.');
       payBtn.disabled = false;
       payBtn.textContent = '🛒 Pagar';
     }
