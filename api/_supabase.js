@@ -51,4 +51,41 @@ export async function actualizarPedidoPorPreference(preferenceId, cambios) {
     return null;
   }
   return res.json();
+  // --- Agregar esto al final de tu api/_supabase.js existente ---
+
+// Lista todos los pedidos, más recientes primero.
+export async function listarPedidos() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.warn('Supabase no configurado: no se pueden listar pedidos');
+    return [];
+  }
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/pedidos?select=*&order=created_at.desc`,
+    { headers: headers() }
+  );
+  if (!res.ok) {
+    console.error('Error listando pedidos:', await res.text());
+    return [];
+  }
+  return res.json();
+}
+
+// Marca un pedido como entregado o no entregado (buscándolo por id).
+export async function actualizarEntregaPorId(id, entregado) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.warn('Supabase no configurado: se omite actualización de entrega');
+    return null;
+  }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { ...headers(), Prefer: 'return=representation' },
+    body: JSON.stringify({ entregado }),
+  });
+  if (!res.ok) {
+    console.error('Error actualizando entrega:', await res.text());
+    return null;
+  }
+  return res.json();
+}
+
 }
