@@ -2,5 +2,6 @@
   "name": "lamasrica-backend",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Backend serverless para crear preferencias de pago de Mercado Pago (La Más Rica)"
 }
