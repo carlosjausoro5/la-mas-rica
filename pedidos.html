@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Pedidos</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f5f7;
+    margin: 0;
+    padding: 16px;
+    color: #1a1a1a;
+  }
+  h1 { font-size: 1.3rem; margin: 0; }
+
+  #login-screen {
+    max-width: 320px;
+    margin: 80px auto;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  #login-screen input {
+    width: 100%;
+    padding: 10px;
+    margin: 12px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  #login-screen button, .refresh-btn {
+    padding: 10px 16px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  #login-screen button { width: 100%; }
+  #login-error { color: #dc2626; font-size: 0.85rem; margin-top: 8px; }
+
+  #panel { display: none; max-width: 900px; margin: 0 auto; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+
+  .filtros { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .filtro-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .filtro-btn.activo { background: #2563eb; color: white; border-color: #2563eb; }
+
+  .pedido-card {
+    background: white;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .pedido-cliente { font-weight: 600; font-size: 1rem; }
+  .pedido-fecha { font-size: 0.75rem; color: #888; }
+  .pedido-total { font-weight: 700; font-size: 1.05rem; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .badge-pending_payment, .badge-pending { background: #fef3c7; color: #92400e; }
+  .badge-approved { background: #d1fae5; color: #065f46; }
+  .badge-rejected, .badge-cancelled { background: #fee2e2; color: #991b1b; }
+
+  .pedido-detalle { margin-top: 8px; font-size: 0.85rem; color: #444; line-height: 1.5; }
+  .pedido-items { margin-top: 6px; font-size: 0.85rem; }
+  .pedido-items div { padding: 2px 0; }
+
+  .entrega-toggle {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  .entrega-toggle input { width: 18px; height: 18px; }
+
+  #empty, #loading { text-align: center; padding: 40px; color: #888; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <h1>🔒 Panel de Pedidos</h1>
+  <input type="password" id="password-input" placeholder="Contraseña">
+  <button onclick="login()">Entrar</button>
+  <div id="login-error"></div>
+</div>
+
+<div id="panel">
+  <div class="toolbar">
+    <h1>Pedidos</h1>
+    <button class="refresh-btn" onclick="cargarPedidos()">↻ Actualizar</button>
+  </div>
+
+  <div class="filtros">
+    <button class="filtro-btn activo" data-filtro="todos" onclick="filtrar('todos')">Todos</button>
+    <button class="filtro-btn" data-filtro="approved" onclick="filtrar('approved')">Pagados</button>
+    <button class="filtro-btn" data-filtro="pendientes" onclick="filtrar('pendientes')">Pendientes</button>
+    <button class="filtro-btn" data-filtro="sin-entregar" onclick="filtrar('sin-entregar')">Sin entregar</button>
+  </div>
+
+  <div id="loading" style="display:none;">Cargando...</div>
+  <div id="empty" style="display:none;">No hay pedidos todavía.</div>
+  <div id="lista-pedidos"></div>
+</div>
+
+<script>
+  let PASSWORD = '';
+  let TODOS_LOS_PEDIDOS = [];
+  let FILTRO_ACTUAL = 'todos';
+  let memoryStore = {};
+
+  window.onload = () => {
+    const saved = memoryStore['panel_pw'];
+    if (saved) {
+      PASSWORD = saved;
+      mostrarPanel();
+    }
+  };
+
+  async function login() {
+    const input = document.getElementById('password-input').value;
+    const errorEl = document.getElementById('login-error');
+    errorEl.textContent = '';
+    PASSWORD = input;
+    const ok = await cargarPedidos();
+    if (ok) {
+      memoryStore['panel_pw'] = input;
+      mostrarPanel();
+    } else {
+      errorEl.textContent = 'Contraseña incorrecta';
+    }
+  }
+
+  function mostrarPanel() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+  }
+
+  async function cargarPedidos() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('lista-pedidos').innerHTML = '';
+
+    try {
+      const res = await fetch('/api/pedidos', {
+        headers: { 'x-panel-password': PASSWORD }
+      });
+      if (res.status === 401) {
+        document.getElementById('loading').style.display = 'none';
+        return false;
+      }
+      const data = await res.json();
+      TODOS_LOS_PEDIDOS = data.pedidos || [];
+      render();
+      return true;
+    } catch (err) {
+      document.getElementById('loading').style.display = 'none';
+      alert('Error al cargar pedidos: ' + err.message);
+      return false;
+    }
+  }
+
+  function filtrar(tipo) {
+    FILTRO_ACTUAL = tipo;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('activo'));
+    document.querySelector(`[data-filtro="${tipo}"]`).classList.add('activo');
+    render();
+  }
+
+  function render() {
+    document.getElementById('loading').style.display = 'none';
+
+    let pedidos = TODOS_LOS_PEDIDOS;
+    if (FILTRO_ACTUAL === 'approved') pedidos = pedidos.filter(p => p.estado === 'approved');
+    if (FILTRO_ACTUAL === 'pendientes') pedidos = pedidos.filter(p => p.estado === 'pending' || p.estado === 'pending_payment');
+    if (FILTRO_ACTUAL === 'sin-entregar') pedidos = pedidos.filter(p => p.estado === 'approved' && !p.entregado);
+
+    const cont = document.getElementById('lista-pedidos');
+    cont.innerHTML = '';
+
+    if (pedidos.length === 0) {
+      document.getElementById('empty').style.display = 'block';
+      return;
+    }
+    document.getElementById('empty').style.display = 'none';
+
+    pedidos.forEach(p => {
+      const fecha = p.created_at ? new Date(p.created_at).toLocaleString('es-AR') : '-';
+      const nombreCompleto = [p.nombre, p.apellido].filter(Boolean).join(' ') || 'Sin nombre';
+      const items = Array.isArray(p.items) ? p.items : [];
+
+      const itemsHtml = items.map(it =>
+        `<div>• ${escapeHtml(it.title || it.quantity + 'x')} ${it.quantity ? `x${it.quantity}` : ''}</div>`
+      ).join('');
+
+      const card = document.createElement('div');
+      card.className = 'pedido-card';
+      card.innerHTML = `
+        <div class="pedido-header">
+          <div>
+            <div class="pedido-cliente">${escapeHtml(nombreCompleto)}</div>
+            <div class="pedido-fecha">${fecha}</div>
+            <span class="badge badge-${p.estado}">${estadoLabel(p.estado)}</span>
+          </div>
+          <div class="pedido-total">$${p.total ?? '-'}</div>
+        </div>
+        <div class="pedido-detalle">
+          ${p.telefono ? `📞 ${escapeHtml(p.telefono)}<br>` : ''}
+          ${p.direccion ? `📍 ${escapeHtml(p.direccion)} (${escapeHtml(p.tipo_entrega || '')})<br>` : ''}
+        </div>
+        <div class="pedido-items">${itemsHtml}</div>
+        ${p.estado === 'approved' ? `
+          <label class="entrega-toggle">
+            <input type="checkbox" ${p.entregado ? 'checked' : ''} onchange="toggleEntrega(${p.id}, this.checked)">
+            Entregado
+          </label>
+        ` : ''}
+      `;
+      cont.appendChild(card);
+    });
+  }
+
+  function estadoLabel(estado) {
+    const map = {
+      pending_payment: 'Esperando pago',
+      pending: 'Pendiente',
+      approved: 'Pagado',
+      rejected: 'Rechazado',
+      cancelled: 'Cancelado'
+    };
+    return map[estado] || estado;
+  }
+
+  async function toggleEntrega(id, entregado) {
+    try {
+      await fetch('/api/pedidos', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-panel-password': PASSWORD
+        },
+        body: JSON.stringify({ id, entregado })
+      });
+      const pedido = TODOS_LOS_PEDIDOS.find(p => p.id === id);
+      if (pedido) pedido.entregado = entregado;
+    } catch (err) {
+      alert('No se pudo actualizar: ' + err.message);
+    }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+
+</body>
+</html>
