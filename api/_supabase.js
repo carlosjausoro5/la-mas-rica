@@ -51,7 +51,7 @@ export async function actualizarPedidoPorPreference(preferenceId, cambios) {
     return null;
   }
   return res.json();
-  // --- Agregar esto al final de tu api/_supabase.js existente ---
+}
 
 // Lista todos los pedidos, más recientes primero.
 export async function listarPedidos() {
@@ -86,6 +86,4 @@ export async function actualizarEntregaPorId(id, entregado) {
     return null;
   }
   return res.json();
-}
-
 }
