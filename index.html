@@ -982,30 +982,42 @@ const BACKEND_URL = "https://la-mas-rica.vercel.app/api/create-preference";
 
   function construirMensajeWhatsApp(orderData, estadoPago){
     const c = orderData.cliente;
-    let mensaje = 'PEDIDO - LA MAS RICA\n\n';
-    mensaje += 'Cliente: ' + c.nombre + ' ' + c.apellido + '\n';
-    mensaje += 'Telefono: ' + c.telefono + '\n';
+    const fechaHora = new Date().toLocaleString('es-AR', {
+      weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+    });
+    const linea = '━━━━━━━━━━━━━';
+
+    let mensaje = '🍕 *PEDIDO - LA MÁS RICA*\n';
+    mensaje += '_' + fechaHora + '_\n\n';
+
+    mensaje += '*Cliente:* ' + c.nombre + ' ' + c.apellido + '\n';
+    mensaje += '*Teléfono:* ' + c.telefono + '\n';
+
     if(orderData.tipoEntrega === 'retiro'){
-      mensaje += 'Entrega: Retiro en el local\n';
+      mensaje += '🏠 *Entrega:* Retiro en el local\n';
     } else {
-      mensaje += 'Entrega: Envío a domicilio\n';
-      mensaje += 'Direccion: ' + c.direccion + '\n';
+      mensaje += '🛵 *Entrega:* Envío a domicilio\n';
+      mensaje += '📍 ' + c.direccion + '\n';
     }
-    if(c.notas) mensaje += 'Aclaraciones: ' + c.notas + '\n';
-    mensaje += '\nPRODUCTOS:\n';
+    if(c.notas) mensaje += '📝 _' + c.notas + '_\n';
+
+    mensaje += '\n' + linea + '\n';
+    mensaje += '*PRODUCTOS*\n';
 
     let total = 0;
     orderData.items.forEach(it => {
-      mensaje += '• ' + it.title + ': ' + it.quantity + '\n';
-      total += it.quantity * it.unit_price;
+      const subtotal = it.quantity * it.unit_price;
+      mensaje += '• ' + it.quantity + 'x ' + it.title + ' — ' + money(subtotal) + '\n';
+      total += subtotal;
     });
 
     if(orderData.deliveryCost && orderData.deliveryCost > 0){
-      mensaje += '• Envío: ' + money(orderData.deliveryCost) + '\n';
+      mensaje += '\n🛵 Envío: ' + money(orderData.deliveryCost) + '\n';
       total += orderData.deliveryCost;
     }
 
-    mensaje += '\nTOTAL: ' + money(total);
+    mensaje += linea + '\n';
+    mensaje += '*TOTAL: ' + money(total) + '*';
 
     if(estadoPago){
       mensaje += '\n\n💳 Pago: Mercado Pago (' + estadoPago + ')';
